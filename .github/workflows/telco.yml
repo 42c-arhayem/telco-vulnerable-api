@@ -1,0 +1,16 @@
+name: telco Audit
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        env:
+            platformUrl: 'https://demolabs.42crunch.cloud'
