@@ -5,9 +5,6 @@
     "version": "1.0.0",
     "description": "An intentionally vulnerable API inspired by TMF 622, designed to eventually showcase API security issues like BOLA,BOPLA, BFLA, and other OWASP API Top 10 vulnerabilities."
   },
-  "tags": [
-    {}
-  ],
   "servers": [
     {
       "url": "https://localhost:3000",
