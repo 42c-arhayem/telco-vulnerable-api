@@ -14,3 +14,10 @@ jobs:
 
         env:
             platformUrl: 'https://demolabs.42crunch.cloud'
+        
+        steps:
+          #checkout the code
+          - name: Checkout code
+            uses: actions/checkout@v3
+
+          
