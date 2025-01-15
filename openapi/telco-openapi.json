@@ -306,8 +306,10 @@
                       "status": {
                         "$ref": "#/components/schemas/status"
                       }
-                    }
-                  }
+                    },
+                    "additionalProperties": false
+                  },  
+                  "maxItems": 4
                 }
               }
             }
