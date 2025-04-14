@@ -1,9 +1,0 @@
-[
-  {
-    "id": "1",
-    "username": "user1",
-    "password": "password123",
-    "email": "user@domain.com",
-    "isAdmin": false
-  }
-]

@@ -6,9 +6,15 @@ const bodyParser = require("body-parser");
 
 const authRoutes = require("./routes/auth");
 const productOrderRoutes = require("./routes/productOrder");
+const webhookRoutes = require("./routes/webhook");
+const debugRoutes = require("./routes/debug");
+const { connectDB } = require("./data/db");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Connect to Database
+connectDB();
 
 // Middleware
 app.use(bodyParser.json());
@@ -16,6 +22,8 @@ app.use(bodyParser.json());
 // Routes
 app.use("/auth", authRoutes);
 app.use("/productOrder", productOrderRoutes);
+app.use("/webhook", webhookRoutes);
+app.use("/debug", debugRoutes);
 
 // Load SSL Certificates
 const sslOptions = {

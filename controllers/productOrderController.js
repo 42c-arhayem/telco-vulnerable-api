@@ -1,19 +1,35 @@
-const orders = []; // Mock order data
+const Order = require("../models/Order"); // Import the Order model
 
-exports.createOrder = (req, res) => {
-  const order = { id: orders.length + 1, ...req.body };
-  orders.push(order);
-  res.status(201).json({ message: 'Order created', order });
+// Create a new order
+exports.createOrder = async (req, res) => {
+  try {
+    const order = new Order(req.body); // Create a new order using the request body
+    await order.save(); // Save the order to the database
+    res.status(201).json({ message: "Order created", order });
+  } catch (error) {
+    res.status(500).json({ error: "Error creating order" });
+  }
 };
 
-exports.cancelOrder = (req, res) => {
+// Cancel an order
+exports.cancelOrder = async (req, res) => {
   const { orderId } = req.params;
-  const index = orders.findIndex(order => order.id == orderId);
-  if (index === -1) return res.status(404).json({ error: 'Order not found' });
-  orders.splice(index, 1);
-  res.status(200).json({ message: 'Order canceled' });
+
+  try {
+    const order = await Order.findByIdAndDelete(orderId); // Find and delete the order by ID
+    if (!order) return res.status(404).json({ error: "Order not found" });
+    res.status(200).json({ message: "Order canceled", order });
+  } catch (error) {
+    res.status(500).json({ error: "Error canceling order" });
+  }
 };
 
-exports.listOrders = (req, res) => {
-  res.status(200).json(orders);
+// List all orders
+exports.listOrders = async (req, res) => {
+  try {
+    const orders = await Order.find(); // Fetch all orders from the database
+    res.status(200).json(orders);
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching orders" });
+  }
 };

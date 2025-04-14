@@ -1,42 +1,61 @@
 const express = require("express");
-const { orders, saveOrders } = require("../data/db");
 const { authenticate } = require("../middleware/auth");
+const Order = require("../models/Order"); // Import the Order model
 const router = express.Router();
 
-// BOLA Vulnerability: Allows access to another user's orders
-router.get("/:orderId", authenticate, (req, res) => {
-  const order = orders.find(o => o.id === req.params.orderId);
-  if (!order) return res.status(404).json({ error: "Order not found" });
+// Get an order by ID (without BOLA protection)
+router.get("/:orderId", authenticate, async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.orderId);
 
-  // No check to ensure the user owns the order
-  res.status(200).json(order);
-});
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
 
-// BFLA Vulnerability: Allows users without roles to create orders for others
-router.post("/", authenticate, (req, res) => {
-  const { productId, quantity, customerId } = req.body;
-
-  const newOrder = {
-    id: (orders.length + 1).toString(),
-    productId,
-    quantity,
-    customerId
-  };
-
-  orders.push(newOrder); // Add to the in-memory database
-  saveOrders(orders); // Persist to the file
-  res.status(201).json({ message: "Order created successfully", order: newOrder });
-});
-
-router.delete("/:orderId", authenticate, (req, res) => {
-  const orderIndex = orders.findIndex(o => o.id === req.params.orderId);
-  if (orderIndex === -1) {
-    return res.status(404).json({ error: "Order not found" });
+    // Removed ownership or admin check
+    res.status(200).json(order);
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching order" });
   }
+});
 
-  orders.splice(orderIndex, 1); // Remove from memory
-  saveOrders(orders); // Persist the changes
-  res.status(200).json({ message: "Order canceled successfully" });
+// Create a new order (without BFLA protection)
+router.post("/", authenticate, async (req, res) => {
+  const { productId, quantity, customerId } = req.body; // Allow customerId to be passed in the request body
+
+  try {
+    const newOrder = new Order({
+      productId,
+      quantity,
+      customerId, // Use the customerId from the request body
+    });
+
+    await newOrder.save();
+    res.status(201).json({ message: "Order created successfully", order: newOrder });
+  } catch (error) {
+    res.status(500).json({ error: "Error creating order" });
+  }
+});
+
+// Delete an order by ID
+router.delete("/:orderId", authenticate, async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.orderId);
+
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    // Ensure the authenticated user owns the order or is an admin
+    if (order.customerId.toString() !== req.user._id.toString() && !req.user.isAdmin) {
+      return res.status(403).json({ error: "Forbidden: You do not have access to cancel this order" });
+    }
+
+    await Order.findByIdAndDelete(req.params.orderId);
+    res.status(200).json({ message: "Order canceled successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Error canceling order" });
+  }
 });
 
 module.exports = router;

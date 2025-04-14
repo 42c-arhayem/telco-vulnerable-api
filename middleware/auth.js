@@ -1,16 +1,36 @@
 const jwt = require("jsonwebtoken");
-const { users } = require("../data/db");
+const User = require("../models/User");
 
-const authenticate = (req, res, next) => {
-  const token = req.headers["authorization"]?.split(" ")[1];
-  if (!token) return res.status(401).json({ error: "Unauthorized" });
+const authenticate = async (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "Unauthorized: Missing or invalid token" });
+  }
+
+  const token = authHeader.split(" ")[1];
 
   try {
+    // Verify the token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = users.find(user => user.id === decoded.id);
+
+    // Fetch the user from the database
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      return res.status(401).json({ error: "Unauthorized: User not found" });
+    }
+
+    // Attach the user to the request object
+    req.user = user;
     next();
   } catch (err) {
-    return res.status(401).json({ error: "Unauthorized" });
+    // Handle token expiration or invalid token
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({ error: "Unauthorized: Token expired" });
+    }
+    if (err.name === "JsonWebTokenError") {
+      return res.status(401).json({ error: "Unauthorized: Invalid token" });
+    }
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
 

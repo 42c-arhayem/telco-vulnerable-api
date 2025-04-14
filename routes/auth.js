@@ -1,58 +1,43 @@
 const express = require("express");
-const fs = require("fs");
-const path = require("path");
 const { generateToken } = require("../utils/jwt");
+const User = require("../models/User"); // Import the User model
 const router = express.Router();
 
-const usersPath = path.join(__dirname, "../data/users.json");
+// Register a new user
+router.post("/register", async (req, res) => {
+  try {
+    const newUser = new User(req.body); // Directly use the request body without filtering
+    await newUser.save();
 
-// Load users from the users.json file
-const loadUsers = () => {
-  if (fs.existsSync(usersPath)) {
-    try {
-      const data = fs.readFileSync(usersPath, "utf-8");
-      if (!data) {
-        throw new Error("Users file is empty");
-      }
-      return JSON.parse(data);
-    } catch (error) {
-      console.error("Error parsing users JSON:", error.message);
-      return [];
-    }
+    res.status(201).json({
+      message: "User registered successfully",
+      userId: newUser._id,
+      isAdmin: newUser.isAdmin, // Include isAdmin in the response
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Error registering user" });
   }
-  return [];
-};
-
-// Save users to the users.json file
-const saveUsers = (users) => {
-  fs.writeFileSync(usersPath, JSON.stringify(users, null, 2), "utf-8");
-};
-
-// Initialize the in-memory users database
-let users = loadUsers();
-
-// BOPLA Vulnerability (Mass Assignment): Allows "isAdmin" injection
-router.post("/register", (req, res) => {
-  const { username, password, email, isAdmin } = req.body;
-  const newUser = {
-    id: (users.length + 1).toString(),
-    username,
-    password,
-    email,
-    isAdmin: isAdmin || false // Mass Assignment vulnerability
-  };
-  users.push(newUser);
-  saveUsers(users); // Save the updated users list to the file
-  res.status(201).json({ message: "User registered", userId: newUser.id });
 });
 
-router.post("/login", (req, res) => {
+// Login a user
+router.post("/login", async (req, res) => {
   const { username, password } = req.body;
-  const user = users.find(u => u.username === username && u.password === password);
-  if (!user) return res.status(401).json({ error: "Invalid credentials" });
 
-  const token = generateToken(user);
-  res.status(200).json({ message: "Login successful", token });
+  try {
+    const user = await User.findOne({ username, password });
+    if (!user) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    const token = generateToken({ id: user._id, isAdmin: user.isAdmin });
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      user, // Leak full user object
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Error logging in" });
+  }
 });
 
 module.exports = router;

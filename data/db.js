@@ -1,53 +1,50 @@
-const fs = require("fs");
-const path = require("path");
+const mongoose = require("mongoose");
+const User = require("../models/User"); // Import the User model
 
-// Define the path for the orders JSON file
-const dbPath = path.join(__dirname, "orders.json");
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI); // Connect to MongoDB
+    console.log("MongoDB connected successfully");
 
-// Load existing orders from the file
-const loadOrders = () => {
-  if (fs.existsSync(dbPath)) {
-    try {
-      const data = fs.readFileSync(dbPath, "utf-8");
-      if (!data) {
-        throw new Error("Orders file is empty");
-      }
-      return JSON.parse(data);
-    } catch (error) {
-      console.error("Error parsing orders JSON:", error.message);
-      return [];
-    }
+    // Seed default users
+    await seedDefaultUsers();
+  } catch (error) {
+    console.error("MongoDB connection error:", error.message);
+    process.exit(1);
   }
-  return [];
 };
 
-// Save orders to the file
-const saveOrders = (orders) => {
-  fs.writeFileSync(dbPath, JSON.stringify(orders, null, 2), "utf-8");
-};
-
-// Initialize the in-memory orders database
-let orders = loadOrders();
-
-// Define the users array (assuming users are stored in a separate JSON file)
-const usersPath = path.join(__dirname, "users.json");
-
-const loadUsers = () => {
-  if (fs.existsSync(usersPath)) { // Use fs.existsSync instead of fs.exists
-    try {
-      const data = fs.readFileSync(usersPath, "utf-8");
-      if (!data) {
-        throw new Error("Users file is empty");
-      }
-      return JSON.parse(data);
-    } catch (error) {
-      console.error("Error parsing users JSON:", error.message);
-      return [];
+// Function to seed default users
+const seedDefaultUsers = async () => {
+  try {
+    // Check if admin user already exists
+    const adminExists = await User.findOne({ username: "admin" });
+    if (!adminExists) {
+      const adminUser = new User({
+        username: "admin",
+        password: "password", // In a real application, hash this password
+        email: "admin@company.com",
+        isAdmin: true,
+      });
+      await adminUser.save();
+      console.log("Default admin user created");
     }
+
+    // Check if regular user already exists
+    const regularUserExists = await User.findOne({ username: "user" });
+    if (!regularUserExists) {
+      const regularUser = new User({
+        username: "user",
+        password: "password", // In a real application, hash this password
+        email: "user@company.com",
+        isAdmin: false,
+      });
+      await regularUser.save();
+      console.log("Default regular user created");
+    }
+  } catch (error) {
+    console.error("Error seeding default users:", error.message);
   }
-  return [];
 };
 
-const users = loadUsers();
-
-module.exports = { orders, saveOrders, users };
+module.exports = { connectDB };
