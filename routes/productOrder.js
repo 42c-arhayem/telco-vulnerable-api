@@ -1,9 +1,10 @@
 const express = require("express");
 const { authenticate } = require("../middleware/auth");
 const Order = require("../models/Order"); // Import the Order model
+const mongoose = require("mongoose"); // Import mongoose for ObjectId validation
 const router = express.Router();
 
-// Get an order by ID (without BOLA protection)
+// Get an order by ID
 router.get("/:orderId", authenticate, async (req, res) => {
   try {
     const order = await Order.findById(req.params.orderId);
@@ -19,20 +20,26 @@ router.get("/:orderId", authenticate, async (req, res) => {
   }
 });
 
-// Create a new order (without BFLA protection)
+// Create a new order
 router.post("/", authenticate, async (req, res) => {
-  const { productId, quantity, customerId } = req.body; // Allow customerId to be passed in the request body
+  const { productId, quantity } = req.body;
+
+  // Validate request body
+  if (!productId || !quantity ) {
+    return res.status(400).json({ error: "Missing required fields: productId,or quantity" });
+  }
 
   try {
     const newOrder = new Order({
       productId,
       quantity,
-      customerId, // Use the customerId from the request body
+      customerId: req.user._id
     });
 
     await newOrder.save();
     res.status(201).json({ message: "Order created successfully", order: newOrder });
   } catch (error) {
+    console.error("Error creating order:", error); // Log the error
     res.status(500).json({ error: "Error creating order" });
   }
 });

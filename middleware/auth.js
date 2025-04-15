@@ -1,4 +1,3 @@
-const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 const authenticate = async (req, res, next) => {
@@ -10,11 +9,19 @@ const authenticate = async (req, res, next) => {
   const token = authHeader.split(" ")[1];
 
   try {
-    // Verify the token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // Decode the JWT payload (do NOT verify signature)
+    const payloadBase64 = token.split(".")[1];
+    const payloadJSON = Buffer.from(payloadBase64, "base64").toString("utf8");
+    const payload = JSON.parse(payloadJSON);
 
-    // Fetch the user from the database
-    const user = await User.findById(decoded.id);
+    // Extract the customerId from the payload
+    const customerId = payload.accountId;
+    if (!customerId) {
+      return res.status(401).json({ error: "Unauthorized: No customerId in token payload" });
+    }
+
+    // Fetch the user from the database using the extracted customerId
+    const user = await User.findById(customerId);
     if (!user) {
       return res.status(401).json({ error: "Unauthorized: User not found" });
     }
@@ -23,13 +30,7 @@ const authenticate = async (req, res, next) => {
     req.user = user;
     next();
   } catch (err) {
-    // Handle token expiration or invalid token
-    if (err.name === "TokenExpiredError") {
-      return res.status(401).json({ error: "Unauthorized: Token expired" });
-    }
-    if (err.name === "JsonWebTokenError") {
-      return res.status(401).json({ error: "Unauthorized: Invalid token" });
-    }
+    console.error("Error in authentication middleware:", err.message);
     return res.status(500).json({ error: "Internal server error" });
   }
 };
