@@ -4,18 +4,38 @@ const Order = require("../models/Order"); // Import the Order model
 const mongoose = require("mongoose"); // Import mongoose for ObjectId validation
 const router = express.Router();
 
+// List all orders for the authenticated user
+router.get("/", authenticate, async (req, res) => {
+  try {
+    let orders;
+
+    // If the user is an admin, retrieve all orders
+    if (req.user.isAdmin) {
+      orders = await Order.find();
+    } else {
+      // Otherwise, retrieve only the orders for the authenticated user
+      orders = await Order.find({ customerId: req.user._id });
+    }
+
+    res.status(200).json({ orders });
+  } catch (error) {
+    console.error("Error fetching orders:", error); // Log the error
+    res.status(500).json({ error: "Error fetching orders" });
+  }
+});
+
 // Get an order by ID
 router.get("/:orderId", authenticate, async (req, res) => {
   try {
-    const order = await Order.findById(req.params.orderId);
+    // Query the database using the custom orderId field
+    const order = await Order.findOne({ orderId: req.params.orderId });
 
     if (!order) {
       return res.status(404).json({ error: "Order not found" });
     }
-
-    // Removed ownership or admin check
     res.status(200).json(order);
   } catch (error) {
+    console.error("Error fetching order:", error); // Log the error
     res.status(500).json({ error: "Error fetching order" });
   }
 });
@@ -47,7 +67,8 @@ router.post("/", authenticate, async (req, res) => {
 // Delete an order by ID
 router.delete("/:orderId", authenticate, async (req, res) => {
   try {
-    const order = await Order.findById(req.params.orderId);
+    // Query the database using the custom orderId field
+    const order = await Order.findOne({ orderId: req.params.orderId });
 
     if (!order) {
       return res.status(404).json({ error: "Order not found" });
@@ -58,9 +79,11 @@ router.delete("/:orderId", authenticate, async (req, res) => {
       return res.status(403).json({ error: "Forbidden: You do not have access to cancel this order" });
     }
 
-    await Order.findByIdAndDelete(req.params.orderId);
+    // Delete the order using the orderId field
+    await Order.findOneAndDelete({ orderId: req.params.orderId });
     res.status(200).json({ message: "Order canceled successfully" });
   } catch (error) {
+    console.error("Error canceling order:", error); // Log the error
     res.status(500).json({ error: "Error canceling order" });
   }
 });
