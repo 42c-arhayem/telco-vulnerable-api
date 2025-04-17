@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { v4: uuidv4 } = require("uuid"); // Import uuid for generating customerId
 const User = require("../models/User"); // Import the User model
 
 const connectDB = async () => {
@@ -25,6 +26,7 @@ const seedDefaultUsers = async () => {
         password: "password", // In a real application, hash this password
         email: "admin@company.com",
         isAdmin: true,
+        customerId: uuidv4(), // Generate a unique customerId
       });
       await adminUser.save();
       console.log("Default admin user created");
@@ -38,6 +40,7 @@ const seedDefaultUsers = async () => {
         password: "password", // In a real application, hash this password
         email: "user@company.com",
         isAdmin: false,
+        customerId: uuidv4(), // Generate a unique customerId
       });
       await regularUser.save();
       console.log("Default regular user created");
