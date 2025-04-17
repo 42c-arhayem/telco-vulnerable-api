@@ -1,0 +1,6 @@
+audit:
+  branches:
+    main: 
+      discovery:
+        search:
+          - openapi/*.*
