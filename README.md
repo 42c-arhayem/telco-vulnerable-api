@@ -1,4 +1,3 @@
-Telco Vulnerable API Documentation
 Overview
 The Telco Vulnerable API is an intentionally vulnerable API designed to demonstrate the OWASP Top 10 API Security Issues in the context of a telco company. This API provides functionalities for managing product orders and user authentication while showcasing common vulnerabilities that can lead to severe security risks.
 
