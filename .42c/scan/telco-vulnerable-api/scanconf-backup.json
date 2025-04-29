@@ -685,63 +685,6 @@
           "fuzzing": true
         }
       ]
-    },
-    "DeleteUser": {
-      "operationId": "DeleteUser",
-      "scenarios": [
-        {
-          "key": "happy.path",
-          "fuzzing": true,
-          "requests": [
-            {
-              "$ref": "#/operations/DeleteUser/request",
-              "fuzzing": true
-            }
-          ]
-        }
-      ],
-      "request": {
-        "operationId": "DeleteUser",
-        "auth": [
-          "bearerAuth"
-        ],
-        "request": {
-          "type": "42c",
-          "details": {
-            "url": "{{host}}/auth/user/{username}",
-            "method": "DELETE",
-            "paths": [
-              {
-                "key": "username",
-                "value": "rV3j1gk"
-              }
-            ]
-          }
-        },
-        "defaultResponse": "200",
-        "responses": {
-          "200": {
-            "expectations": {
-              "httpStatus": 200
-            }
-          },
-          "403": {
-            "expectations": {
-              "httpStatus": 403
-            }
-          },
-          "404": {
-            "expectations": {
-              "httpStatus": 404
-            }
-          },
-          "500": {
-            "expectations": {
-              "httpStatus": 500
-            }
-          }
-        }
-      }
     }
   },
   "authenticationDetails": [
