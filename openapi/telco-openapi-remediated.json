@@ -648,15 +648,18 @@
         "required": true,
         "in": "path",
         "schema": {
-          "type": "string",
-          "format": "uuid",
-          "example": "123e4567-e89b-12d3-a456-426614174000",
-          "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$",
-          "minLength": 36,
-          "maxLength": 36,
-          "x-42c-format": "o:uuid"
+          "$ref": "#/components/schemas/orderId"
         }
       },
+      "customerId": {
+        "name": "customerId",
+        "description": "The ID of the customer to retrieve orders for.",
+        "required": true,
+        "in": "path",
+        "schema": {
+          "$ref": "#/components/schemas/customerId"
+        }
+      },      
       "username": {
         "name": "username",
         "in": "path",
