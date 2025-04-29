@@ -654,8 +654,8 @@
       "customerId": {
         "name": "customerId",
         "description": "The ID of the customer to retrieve orders for.",
-        "required": true,
-        "in": "path",
+        "required": false,
+        "in": "query",
         "schema": {
           "$ref": "#/components/schemas/customerId"
         }
