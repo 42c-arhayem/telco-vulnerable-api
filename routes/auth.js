@@ -1,5 +1,6 @@
 const express = require("express");
 const { generateToken } = require("../utils/jwt");
+const { authenticate } = require("../middleware/auth");
 const User = require("../models/User"); // Import the User model
 const router = express.Router();
 
@@ -47,6 +48,31 @@ router.post("/login", async (req, res) => {
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).json({ error: "Error logging in" });
+  }
+});
+
+// Delete a user by username
+router.delete("/user/:username", authenticate, async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    // Check if the user exists
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // // BOLA vulnerability Fix: Ensure that only the user themselves or an admin can delete the user
+    // if (req.user.username !== username && !req.user.isAdmin) {
+    //   return res.status(403).json({ message: "Forbidden: You are not authorized to delete this user" });
+    // }
+
+    // Delete the user
+    await User.deleteOne({ username });
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    res.status(500).json({ message: "Error deleting user" });
   }
 });
 

@@ -40,18 +40,14 @@
         "httpStatusExpected": true,
         "mustBeConformant": true
       },
-      "httpStatusExpected": [
-        "2XX",
-        "404"
-      ]
+      "httpStatusExpected": []
     },
     "tests": {
       "responsePolicy": {
         "httpStatusExpected": true,
         "mustBeConformant": true
       }
-    },
-    "requests": {}
+    }
   },
   "environments": {
     "default": {
@@ -64,15 +60,15 @@
         },
         "username": {
           "name": "SCAN42C_USERNAME",
-          "from": "environment",
+          "default": "user",
           "required": false,
-          "default": "user1"
+          "from": "environment"
         },
         "password": {
           "name": "SCAN42C_PASSWORD",
-          "from": "environment",
+          "default": "password",
           "required": false,
-          "default": "password123"
+          "from": "environment"
         }
       }
     }
@@ -94,7 +90,7 @@
             "paths": [
               {
                 "key": "orderId",
-                "value": "{{orderId}}"
+                "value": "123e4567-e89b-12d3-a456-426614174000"
               }
             ]
           }
@@ -121,19 +117,14 @@
               "httpStatus": 403
             }
           },
-          "404": {
-            "expectations": {
-              "httpStatus": 404
-            }
-          },
           "406": {
             "expectations": {
               "httpStatus": 406
             }
           },
-          "409": {
+          "415": {
             "expectations": {
-              "httpStatus": 409
+              "httpStatus": 415
             }
           },
           "429": {
@@ -153,29 +144,6 @@
           }
         }
       },
-      "before": [
-        {
-          "$ref": "#/operations/CreateProductOrder/request",
-          "responses": {
-            "201": {
-              "expectations": {
-                "httpStatus": 201
-              },
-              "variableAssignments": {
-                "orderId": {
-                  "in": "body",
-                  "from": "response",
-                  "contentType": "json",
-                  "path": {
-                    "type": "jsonPointer",
-                    "value": "/order/id"
-                  }
-                }
-              }
-            }
-          }
-        }
-      ],
       "scenarios": [
         {
           "key": "happy.path",
@@ -211,7 +179,7 @@
             "requestBody": {
               "mode": "json",
               "json": {
-                "customerId": "a83a29f5-0d63-46f2-8f2e-44c2f1d2e07e",
+                "customerId": "{{customerId}}",
                 "productId": "SIM001",
                 "quantity": 1
               }
@@ -255,6 +223,11 @@
               "httpStatus": 429
             }
           },
+          "500": {
+            "expectations": {
+              "httpStatus": 500
+            }
+          },
           "default": {
             "expectations": {
               "httpStatus": "default"
@@ -287,7 +260,17 @@
           "details": {
             "operationId": "ListProductOrders",
             "method": "GET",
-            "url": "{{host}}/productOrder"
+            "url": "{{host}}/productOrder",
+            "queries": [
+              {
+                "key": "customerId",
+                "value": "a83a29f5-0d63-46f2-8f2e-44c2f1d2e07e"
+              },
+              {
+                "key": "status",
+                "value": "completed"
+              }
+            ]
           }
         },
         "defaultResponse": "200",
@@ -312,14 +295,14 @@
               "httpStatus": 403
             }
           },
-          "404": {
-            "expectations": {
-              "httpStatus": 404
-            }
-          },
           "406": {
             "expectations": {
               "httpStatus": 406
+            }
+          },
+          "415": {
+            "expectations": {
+              "httpStatus": 415
             }
           },
           "429": {
@@ -368,7 +351,7 @@
             "paths": [
               {
                 "key": "orderId",
-                "value": ""
+                "value": "123e4567-e89b-12d3-a456-426614174000"
               }
             ]
           }
@@ -395,19 +378,24 @@
               "httpStatus": 403
             }
           },
-          "404": {
-            "expectations": {
-              "httpStatus": 404
-            }
-          },
           "406": {
             "expectations": {
               "httpStatus": 406
             }
           },
+          "415": {
+            "expectations": {
+              "httpStatus": 415
+            }
+          },
           "429": {
             "expectations": {
               "httpStatus": 429
+            }
+          },
+          "500": {
+            "expectations": {
+              "httpStatus": 500
             }
           },
           "default": {
@@ -449,9 +437,18 @@
                 "value": "application/json"
               }
             ],
+            "paths": [
+              {
+                "key": "orderId",
+                "value": "123e4567-e89b-12d3-a456-426614174000"
+              }
+            ],
             "requestBody": {
               "mode": "json",
-              "json": {}
+              "json": {
+                "productId": "SIM002",
+                "quantity": 1
+              }
             }
           }
         },
@@ -462,6 +459,11 @@
               "httpStatus": 200
             }
           },
+          "400": {
+            "expectations": {
+              "httpStatus": 400
+            }
+          },
           "401": {
             "expectations": {
               "httpStatus": 401
@@ -470,11 +472,6 @@
           "403": {
             "expectations": {
               "httpStatus": 403
-            }
-          },
-          "404": {
-            "expectations": {
-              "httpStatus": 404
             }
           },
           "406": {
@@ -490,6 +487,11 @@
           "429": {
             "expectations": {
               "httpStatus": 429
+            }
+          },
+          "500": {
+            "expectations": {
+              "httpStatus": 500
             }
           },
           "default": {
@@ -613,9 +615,16 @@
             "requestBody": {
               "mode": "json",
               "json": {
+                "address": {
+                  "city": "Springfield",
+                  "country": "US",
+                  "postcode": "62701",
+                  "state": "IL",
+                  "street": "123 Main St."
+                },
                 "email": "user@domain.com",
-                "password": "password123",
-                "username": "user1"
+                "password": "password",
+                "username": "user3"
               }
             }
           }
@@ -630,6 +639,11 @@
           "400": {
             "expectations": {
               "httpStatus": 400
+            }
+          },
+          "401": {
+            "expectations": {
+              "httpStatus": 401
             }
           },
           "406": {
@@ -677,63 +691,11 @@
     {
       "bearerAuth": {
         "type": "bearer",
-        "default": "User1",
+        "default": "bearerAuth",
         "credentials": {
-          "User1": {
+          "bearerAuth": {
             "credential": "{{bearerAuth}}",
-            "requests": [
-              {
-                "$ref": "#/operations/UserLogin/request",
-                "responses": {
-                  "200": {
-                    "expectations": {
-                      "httpStatus": 200
-                    },
-                    "variableAssignments": {
-                      "bearerAuth": {
-                        "in": "body",
-                        "from": "response",
-                        "contentType": "json",
-                        "path": {
-                          "type": "jsonPointer",
-                          "value": "/token"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            ]
-          },
-          "Admin": {
-            "credential": "{{bearerAuth}}",
-            "requests": [
-              {
-                "$ref": "#/operations/UserLogin/request",
-                "environment": {
-                  "username": "admin",
-                  "password": "admin123"
-                },
-                "responses": {
-                  "200": {
-                    "expectations": {
-                      "httpStatus": 200
-                    },
-                    "variableAssignments": {
-                      "bearerAuth": {
-                        "in": "body",
-                        "from": "response",
-                        "contentType": "json",
-                        "path": {
-                          "type": "jsonPointer",
-                          "value": "/token"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            ]
+            "description": "bearerAuth security"
           }
         }
       }

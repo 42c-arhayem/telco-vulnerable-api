@@ -180,6 +180,71 @@
         "security": []
       }
     },
+    "/auth/user/{username}": {
+      "delete": {
+        "summary": "Delete User",
+        "operationId": "DeleteUser",
+        "description": "Deletes a user by their username.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/username"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deleted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "User deleted successfully.",
+                      "pattern": "^User deleted successfully.$",
+                      "minLength": 0,
+                      "maxLength": 100
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/ResponseError403"
+          },
+          "404": {
+            "description": "User not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "User not found.",
+                      "pattern": "^User not found.$",
+                      "minLength": 0,
+                      "maxLength": 100
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/ResponseError500"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/productOrder": {
       "post": {
         "summary": "Create Product Order",
@@ -274,7 +339,7 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/customerId"
-            },
+          },
           {
             "name": "status",
             "in": "query",
@@ -592,17 +657,17 @@
           "x-42c-format": "o:uuid"
         }
       },
-      "customerId": {
-        "name": "customerId",
-        "in": "query",
+      "username": {
+        "name": "username",
+        "in": "path",
+        "description": "The unique customerId of the user to delete.",
+        "required": true,
         "schema": {
           "type": "string",
-          "format": "uuid",
-          "example": "a83a29f5-0d63-46f2-8f2e-44c2f1d2e07e",
-          "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$",
-          "minLength": 36,
-          "maxLength": 36,
-          "x-42c-format": "o:uuid"
+          "example": "user",
+          "pattern": "^[\\sa-zA-Z0-9]{5,35}$",
+          "minLength": 5,
+          "maxLength": 35
         }
       }
     },
@@ -610,14 +675,14 @@
       "username": {
         "type": "string",
         "pattern": "^[\\sa-zA-Z0-9]{5,35}$",
-        "example": "user1",
+        "example": "user",
         "minLength": 5,
         "maxLength": 35
       },
       "password": {
         "type": "string",
         "pattern": "^[a-zA-Z0-9&@#!?]{8,64}$",
-        "example": "password123",
+        "example": "password",
         "format": "o:common:password",
         "minLength": 8,
         "maxLength": 64,
@@ -652,23 +717,23 @@
           "state": {
             "type": "string",
             "example": "IL",
-            "pattern": "^[a-zA-Z]{2,20}$",
+            "pattern": "^[a-zA-Z]{2,50}$",
             "minLength": 2,
-            "maxLength": 20
+            "maxLength": 2
           },
-          "zip": {
+          "postcode": {
             "type": "string",
             "example": "62701",
-            "pattern": "^[0-9]{5,10}$",
+            "pattern": "^[a-zA-Z0-9\\s]{5,12}$",
             "minLength": 5,
-            "maxLength": 10
+            "maxLength": 12
           },
           "country": {
             "type": "string",
-            "example": "USA",
+            "example": "US",
             "pattern": "^[a-zA-Z]{2,50}$",
             "minLength": 2,
-            "maxLength": 50
+            "maxLength": 2
           }
         },
         "additionalProperties": false
@@ -784,6 +849,16 @@
       },
       "ResponseError403": {
         "description": "Forbidden",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MessageObject"
+            }
+          }
+        }
+      },
+      "ResponseError404": {
+        "description": "Not Found",
         "content": {
           "application/json": {
             "schema": {
