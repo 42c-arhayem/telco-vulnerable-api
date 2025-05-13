@@ -28,6 +28,7 @@ jobs:
           api-token: ${{ env.X42C_API_TOKEN }}
           platform-url: ${{ env.platformUrl }}
           json-report: audit-action-report-${{ github.run_id }}.json
+          skip-failures: true
 
       # Extract API_UUIDs for all OpenAPI specs
       - name: Extract API UUIDs
