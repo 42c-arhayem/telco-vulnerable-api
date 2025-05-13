@@ -31,7 +31,7 @@ jobs:
               # Minimum score for OpenAPI files.
               # min-score: # optional, default is 75
               # 42Crunch platform URL
-              platform-url: ${ env.platformUrl }
+              platform-url: ${{ env.platformUrl }}
               # Log level, one of: FATAL, ERROR, WARN, INFO, DEBUG
               # log-level: # optional, default is INFO
               # Share new API collections with everyone, one of: OFF, READ_ONLY, READ_WRITE
