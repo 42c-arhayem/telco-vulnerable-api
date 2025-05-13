@@ -1,4 +1,4 @@
-name: telco Audit
+name: Run Security Audit
 
 on:
   push:
@@ -48,7 +48,7 @@ jobs:
 
       # Upload API UUIDs as an artifact
       - name: Upload API UUIDs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
-          name: api-uuids
-          path: api_uuids.json
+            name: api-uuids
+            path: api_uuids.json
