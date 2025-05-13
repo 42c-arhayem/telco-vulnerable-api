@@ -48,7 +48,7 @@ jobs:
 
       # Upload API UUIDs as an artifact
       - name: Upload API UUIDs
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4.6.2
         with:
             name: api-uuids
             path: api_uuids.json

@@ -22,9 +22,10 @@ jobs:
 
       # Download the API UUIDs artifact
       - name: Download API UUIDs
-        uses: actions/download-artifact@v3
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: api-uuids
+          path: ./api_uuids.json
 
       # Reconfigure Protection for telco-openapi-protection.json
       - name: Reconfigure Protection for telco-openapi-protection.json
