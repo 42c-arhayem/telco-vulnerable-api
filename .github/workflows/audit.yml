@@ -13,7 +13,7 @@ jobs:
         runs-on: ubuntu-latest
 
         env:
-            platformUrl: ''
+            platformUrl: 'https://demolabs.42crunch.cloud'
             X42C_API_TOKEN: ${{ secrets.API_KEY }}
             
         steps:
@@ -31,7 +31,7 @@ jobs:
               # Minimum score for OpenAPI files.
               # min-score: # optional, default is 75
               # 42Crunch platform URL
-              platform-url: https://demolabs.42crunch.cloud
+              platform-url: ${ env.platformUrl }
               # Log level, one of: FATAL, ERROR, WARN, INFO, DEBUG
               # log-level: # optional, default is INFO
               # Share new API collections with everyone, one of: OFF, READ_ONLY, READ_WRITE
@@ -58,4 +58,23 @@ jobs:
               # sarif-report: # optional, default is 
               # Set the maximum timeout (in seconds) for the audit report. Fail if the result isn't ready within that interval.
               # audit-timeout: # optional
-                      
+          - name: Check Audit Summary Report
+            id: Check_Audit
+            run: |
+              echo "Audit JSON Report:"
+              echo ${{ github.workspace }}/audit-action-report-${{ github.run_id }}.json
+              cat ${{ github.workspace }}/audit-action-report-${{ github.run_id }}.json
+              apiId=$(cat ${{ github.workspace }}/audit-action-report-${{ github.run_id }}.json | jq -r '.audit.report."openapi/telco-openapi-protection.json".apiId')
+              echo "API UUID: $apiId"
+              echo "::set-output name=API_UUID::$apiId"  
+              steps:
+          - name: Reconfigure Protection
+            id: Reconfigure_Protection
+            run: |
+              echo "Reconfigure Protection"
+              echo "API UUID: ${{ steps.Check_Audit.outputs.API_UUID }}"
+              API_UUID=${{ steps.Check_Audit.outputs.API_UUID }}
+              PLATFORM_URL=${{ env.platformUrl }}
+              curl --location "$PLATFORM_URL/api/v1/apis/$API_UUID/protection" \
+              --header "Content-Type: application/json" \
+              --header "X-API-KEY: ${{ env.X42C_API_TOKEN }}"
