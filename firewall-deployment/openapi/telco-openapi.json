@@ -1,0 +1,961 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Telco Vulnerable API",
+    "version": "1.0.0",
+    "description": "An intentionally vulnerable API inspired by TMF 622, designed to eventually showcase API security issues like BOLA,BOPLA, BFLA, and other OWASP API Top 10 vulnerabilities."
+  },
+  "servers": [
+    {
+      "url": "https://localhost:3000",
+      "description": "Local development server"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "x-42c-accept-empty-security": true,
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "summary": "User login",
+        "operationId": "UserLogin",
+        "description": "Authenticates a user with a username and password and returns a JWT token.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "$ref": "#/components/schemas/username"
+                  },
+                  "password": {
+                    "$ref": "#/components/schemas/password"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "username",
+                  "password"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Login successful",
+                      "pattern": "^Login successful$",
+                      "minLength": 0,
+                      "maxLength": 100
+                    },
+                    "token": {
+                      "type": "string",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjdXN0b21lcklkIjoiYzU5ZWEzMTYtNmNhYS00ZDRjLWJkZGEtNzQ4NDk0MjY2NDc3IiwiaXNBZG1pbiI6ZmFsc2UsImlhdCI6MTc0Njg5MDQxNiwiZXhwIjoxNzQ2ODk0MDE2fQ.YKvGiSCB9OawrVFZBJeST5xGbOzPOEOdTHbPk8ATDyQ",
+                      "pattern": "^([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_\\-\\+\\/=]{4,})",
+                      "minLength": 25,
+                      "maxLength": 1000
+                    },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "username": {
+                          "$ref": "#/components/schemas/username"
+                        },
+                        "password": {
+                          "$ref": "#/components/schemas/password"
+                        },
+                        "email": {
+                          "$ref": "#/components/schemas/email"
+                        },
+                        "isAdmin": {
+                          "type": "boolean",
+                          "example": false
+                        },
+                        "customerId": {
+                          "$ref": "#/components/schemas/customerId"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ResponseError400"
+          },
+          "401": {
+            "$ref": "#/components/responses/ResponseError401"
+          },
+          "406": {
+            "$ref": "#/components/responses/ResponseError406"
+          },
+          "415": {
+            "$ref": "#/components/responses/ResponseError415"
+          },
+          "429": {
+            "$ref": "#/components/responses/ResponseError429"
+          },
+          "500": {
+            "$ref": "#/components/responses/ResponseError500"
+          },
+          "default": {
+            "$ref": "#/components/responses/DefaultErrorResponse"
+          }
+        },
+        "security": []
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "summary": "User registration",
+        "operationId": "UserRegistration",
+        "description": "Registers a new user with a username, password, and email.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "$ref": "#/components/schemas/username"
+                  },
+                  "password": {
+                    "$ref": "#/components/schemas/password"
+                  },
+                  "email": {
+                    "$ref": "#/components/schemas/email"
+                  },
+                  "address": {
+                    "$ref": "#/components/schemas/address"
+                  }
+                },
+                "required": [
+                  "username",
+                  "password",
+                  "email"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "User registered successfully",
+                      "pattern": "^User registered successfully$",
+                      "minLength": 0,
+                      "maxLength": 28
+                    },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "username": {
+                          "$ref": "#/components/schemas/username"
+                        },
+                        "email": {
+                          "$ref": "#/components/schemas/email"
+                        },
+                        "isAdmin": {
+                          "type": "boolean",
+                          "example": false
+                        },
+                        "customerId": {
+                          "$ref": "#/components/schemas/customerId"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ResponseError400"
+          },
+          "401": {
+            "$ref": "#/components/responses/ResponseError401"
+          },
+          "406": {
+            "$ref": "#/components/responses/ResponseError406"
+          },
+          "415": {
+            "$ref": "#/components/responses/ResponseError415"
+          },
+          "429": {
+            "$ref": "#/components/responses/ResponseError429"
+          },
+          "500": {
+            "$ref": "#/components/responses/ResponseError500"
+          },
+          "default": {
+            "$ref": "#/components/responses/DefaultErrorResponse"
+          }
+        },
+        "security": []
+      }
+    },
+    "/auth/user/{username}": {
+      "delete": {
+        "summary": "Delete User",
+        "operationId": "DeleteUser",
+        "description": "Deletes a user by their username. Only the user themselves or an admin can perform this action.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/username"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deleted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "User deleted successfully.",
+                      "pattern": "^User deleted successfully.$",
+                      "minLength": 0,
+                      "maxLength": 100
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/ResponseError403"
+          },
+          "404": {
+            "description": "User not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "User not found.",
+                      "pattern": "^User not found.$",
+                      "minLength": 0,
+                      "maxLength": 100
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/ResponseError500"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/productOrder": {
+      "post": {
+        "summary": "Create Product Order",
+        "operationId": "CreateProductOrder",
+        "description": "Creates a new product order based on a product offering.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "productId": {
+                    "$ref": "#/components/schemas/productId"
+                  },
+                  "quantity": {
+                    "$ref": "#/components/schemas/quantity"
+                  },
+                  "customerId": {
+                    "$ref": "#/components/schemas/customerId"
+                  }
+                },
+                "required": [
+                  "productId",
+                  "quantity",
+                  "customerId"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Product order created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "orderId": {
+                      "$ref": "#/components/schemas/orderId"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Order created successfully.",
+                      "pattern": "^Order created successfully.$",
+                      "minLength": 0,
+                      "maxLength": 100
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ResponseError400"
+          },
+          "401": {
+            "$ref": "#/components/responses/ResponseError401"
+          },
+          "403": {
+            "$ref": "#/components/responses/ResponseError403"
+          },
+          "406": {
+            "$ref": "#/components/responses/ResponseError406"
+          },
+          "415": {
+            "$ref": "#/components/responses/ResponseError415"
+          },
+          "429": {
+            "$ref": "#/components/responses/ResponseError429"
+          },
+          "500": {
+            "$ref": "#/components/responses/ResponseError500"
+          },
+          "default": {
+            "$ref": "#/components/responses/DefaultErrorResponse"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "get": {
+        "summary": "List Product Orders",
+        "operationId": "ListProductOrders",
+        "description": "Retrieves a list of all product orders.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/customerId"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter orders by status.",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of product orders.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "orderId": {
+                        "$ref": "#/components/schemas/orderId"
+                      },
+                      "productId": {
+                        "$ref": "#/components/schemas/productId"
+                      },
+                      "quantity": {
+                        "$ref": "#/components/schemas/quantity"
+                      },
+                      "status": {
+                        "$ref": "#/components/schemas/status"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ResponseError400"
+          },
+          "401": {
+            "$ref": "#/components/responses/ResponseError401"
+          },
+          "403": {
+            "$ref": "#/components/responses/ResponseError403"
+          },
+          "406": {
+            "$ref": "#/components/responses/ResponseError406"
+          },
+          "415": {
+            "$ref": "#/components/responses/ResponseError415"
+          },
+          "429": {
+            "$ref": "#/components/responses/ResponseError429"
+          },
+          "500": {
+            "$ref": "#/components/responses/ResponseError500"
+          },
+          "default": {
+            "$ref": "#/components/responses/DefaultErrorResponse"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/productOrder/{orderId}": {
+      "get": {
+        "summary": "Retrieve Product Order",
+        "operationId": "RetrieveProductOrder",
+        "description": "Fetches details of a specific product order by ID.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/orderId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product order details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "orderId": {
+                      "$ref": "#/components/schemas/orderId"
+                    },
+                    "productId": {
+                      "$ref": "#/components/schemas/productId"
+                    },
+                    "quantity": {
+                      "$ref": "#/components/schemas/quantity"
+                    },
+                    "status": {
+                      "$ref": "#/components/schemas/status"
+                    },
+                    "orderDate": {
+                      "$ref": "#/components/schemas/orderDate"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ResponseError400"
+          },
+          "401": {
+            "$ref": "#/components/responses/ResponseError401"
+          },
+          "403": {
+            "$ref": "#/components/responses/ResponseError403"
+          },
+          "406": {
+            "$ref": "#/components/responses/ResponseError406"
+          },
+          "415": {
+            "$ref": "#/components/responses/ResponseError415"
+          },
+          "429": {
+            "$ref": "#/components/responses/ResponseError429"
+          },
+          "500": {
+            "$ref": "#/components/responses/ResponseError500"
+          },
+          "default": {
+            "$ref": "#/components/responses/DefaultErrorResponse"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "patch": {
+        "summary": "Update Product Order",
+        "operationId": "UpdateProductOrder",
+        "description": "Partially updates an existing product order.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/orderId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "quantity": {
+                    "$ref": "#/components/schemas/quantity"
+                  },
+                  "productId": {
+                    "$ref": "#/components/schemas/productId"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Product order updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Order updated successfully.",
+                      "pattern": "^Order updated successfully.$",
+                      "minLength": 0,
+                      "maxLength": 100
+                    },
+                    "order": {
+                      "type": "object",
+                      "properties": {
+                        "orderId": {
+                          "$ref": "#/components/schemas/orderId"
+                        },
+                        "quantity": {
+                          "$ref": "#/components/schemas/quantity"
+                        },
+                        "priority": {
+                          "$ref": "#/components/schemas/priority"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ResponseError400"
+          },
+          "401": {
+            "$ref": "#/components/responses/ResponseError401"
+          },
+          "403": {
+            "$ref": "#/components/responses/ResponseError403"
+          },
+          "406": {
+            "$ref": "#/components/responses/ResponseError406"
+          },
+          "415": {
+            "$ref": "#/components/responses/ResponseError415"
+          },
+          "429": {
+            "$ref": "#/components/responses/ResponseError429"
+          },
+          "500": {
+            "$ref": "#/components/responses/ResponseError500"
+          },
+          "default": {
+            "$ref": "#/components/responses/DefaultErrorResponse"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Cancel Product Order",
+        "operationId": "CancelProductOrder",
+        "description": "Cancels an existing product order by ID.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/orderId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product order canceled successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Order canceled successfully.",
+                      "pattern": "^Order canceled successfully.$",
+                      "minLength": 0,
+                      "maxLength": 100
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ResponseError400"
+          },
+          "401": {
+            "$ref": "#/components/responses/ResponseError401"
+          },
+          "403": {
+            "$ref": "#/components/responses/ResponseError403"
+          },
+          "406": {
+            "$ref": "#/components/responses/ResponseError406"
+          },
+          "415": {
+            "$ref": "#/components/responses/ResponseError415"
+          },
+          "429": {
+            "$ref": "#/components/responses/ResponseError429"
+          },
+          "500": {
+            "$ref": "#/components/responses/ResponseError500"
+          },
+          "default": {
+            "$ref": "#/components/responses/DefaultErrorResponse"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "orderId": {
+        "name": "orderId",
+        "description": "The ID of the order to retrieve.",
+        "required": true,
+        "in": "path",
+        "schema": {
+          "$ref": "#/components/schemas/orderId"
+        }
+      },
+      "customerId": {
+        "name": "customerId",
+        "description": "The ID of the customer to filter orders.",
+        "required": false,
+        "in": "query",
+        "schema": {
+          "$ref": "#/components/schemas/customerId"
+        }
+      },
+      "username": {
+        "name": "username",
+        "in": "path",
+        "description": "The unique username of the user to delete.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "user",
+          "pattern": "^[\\sa-zA-Z0-9]{5,35}$",
+          "minLength": 5,
+          "maxLength": 35
+        }
+      }
+    },
+    "schemas": {
+      "username": {
+        "type": "string",
+        "pattern": "^[\\sa-zA-Z0-9]{5,35}$",
+        "example": "user",
+        "minLength": 5,
+        "maxLength": 35
+      },
+      "password": {
+        "type": "string",
+        "pattern": "^[a-zA-Z0-9&@#!?]{8,64}$",
+        "example": "password",
+        "format": "o:common:password",
+        "minLength": 8,
+        "maxLength": 64,
+        "x-42c-format": "o:common:password"
+      },
+      "email": {
+        "type": "string",
+        "pattern": "^[\\w\\-+.]+@((\\w\\-?)+\\.){1,4}[a-zA-Z0-9]{2,63}$",
+        "example": "user@domain.com",
+        "format": "email",
+        "minLength": 5,
+        "maxLength": 68,
+        "x-42c-format": "o:email"
+      },
+      "address": {
+        "type": "object",
+        "properties": {
+          "street": {
+            "type": "string",
+            "example": "123 Main St.",
+            "pattern": "^[a-zA-Z0-9.\\s]{5,100}$",
+            "minLength": 0,
+            "maxLength": 100
+          },
+          "city": {
+            "type": "string",
+            "pattern": "^[a-zA-Z\\s]{3,50}$",
+            "example": "Springfield",
+            "minLength": 3,
+            "maxLength": 50
+          },
+          "state": {
+            "type": "string",
+            "example": "IL",
+            "pattern": "^[a-zA-Z]{2,50}$",
+            "minLength": 2,
+            "maxLength": 2
+          },
+          "postcode": {
+            "type": "string",
+            "example": "62701",
+            "pattern": "^[a-zA-Z0-9\\s]{5,12}$",
+            "minLength": 5,
+            "maxLength": 12
+          },
+          "country": {
+            "type": "string",
+            "example": "US",
+            "pattern": "^[a-zA-Z]{2,50}$",
+            "minLength": 2,
+            "maxLength": 2
+          }
+        },
+        "additionalProperties": false
+      },
+      "productId": {
+        "type": "string",
+        "pattern": "^[a-zA-Z0-9]{5,10}$",
+        "example": "SIM001",
+        "minLength": 5,
+        "maxLength": 10
+      },
+      "customerId": {
+        "type": "string",
+        "format": "uuid",
+        "example": "a83a29f5-0d63-46f2-8f2e-44c2f1d2e07e",
+        "minLength": 36,
+        "maxLength": 36,
+        "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$",
+        "x-42c-format": "o:uuid"
+      },
+      "priority": {
+        "type": "string",
+        "pattern": "^(Low|Medium|High)$",
+        "example": "High",
+        "minLength": 3,
+        "maxLength": 6
+      },
+      "quantity": {
+        "type": "integer",
+        "format": "int32",
+        "example": 1,
+        "minimum": 0,
+        "maximum": 100
+      },
+      "status": {
+        "type": "string",
+        "pattern": "^(processing|completed|canceled)$",
+        "example": "completed",
+        "minLength": 9,
+        "maxLength": 10
+      },
+      "orderId": {
+        "type": "string",
+        "format": "uuid",
+        "example": "123e4567-e89b-12d3-a456-426614174000",
+        "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$",
+        "minLength": 36,
+        "maxLength": 36,
+        "x-42c-format": "o:uuid"
+      },
+      "token": {
+        "type": "string",
+        "pattern": "^([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_\\-\\+\\/=]{4,})",
+        "minLength": 25,
+        "maxLength": 1000,
+        "format": "o:common:JWT",
+        "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+        "x-42c-format": "o:common:JWT"
+      },
+      "orderDate": {
+        "type": "string",
+        "format": "date-time",
+        "example": "2021-08-30T23:01:14.274085491+15:55",
+        "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])T(?:[01][0-9]|2[0-3]):[0-5][0-9]:(?:[0-5][0-9]|60)(?:\\.[0-9]{1,15})?(?:Z|[+\\-](?:[01][0-9]|2[0-3]):[0-5][0-9])$",
+        "minLength": 20,
+        "maxLength": 38,
+        "x-42c-format": "o:date-time"
+      },
+      "MessageObject": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/ResponseMessage"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ResponseMessage": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9\/\\.\"', :_]{1,100}$"
+      }
+    },
+    "responses": {
+      "DefaultErrorResponse": {
+        "description": "Unexpected Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MessageObject"
+            }
+          }
+        }
+      },
+      "ResponseError400": {
+        "description": "Invalid input data",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MessageObject"
+            }
+          }
+        }
+      },
+      "ResponseError401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MessageObject"
+            }
+          }
+        }
+      },
+      "ResponseError403": {
+        "description": "Forbidden",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MessageObject"
+            }
+          }
+        }
+      },
+      "ResponseError404": {
+        "description": "Not Found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MessageObject"
+            }
+          }
+        }
+      },
+      "ResponseError406": {
+        "description": "Not Acceptable",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MessageObject"
+            }
+          }
+        }
+      },
+      "ResponseError415": {
+        "description": "Unsupported Media Type",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MessageObject"
+            }
+          }
+        }
+      },
+      "ResponseError429": {
+        "description": "Too Many Requests",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MessageObject"
+            }
+          }
+        }
+      },
+      "ResponseError500": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MessageObject"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
