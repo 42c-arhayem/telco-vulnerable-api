@@ -9,72 +9,46 @@ on:
       - main
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-        env:
-            platformUrl: 'https://demolabs.42crunch.cloud'
-            X42C_API_TOKEN: ${{ secrets.API_KEY }}
-            
-        steps:
-          #checkout the code
-          - name: Checkout code
-            uses: actions/checkout@v3
+    env:
+      platformUrl: 'https://demolabs.42crunch.cloud'
+      X42C_API_TOKEN: ${{ secrets.API_KEY }}
 
-          - name: 42Crunch REST API Static Security Testing
-          # You may pin to the exact commit or the version.
-          # uses: 42Crunch/api-security-audit-action@8f3291aee67d774baf12330d1bfe86af2c861a06
-            uses: 42Crunch/api-security-audit-action@v3
-            with:
-              # The API token to access 42Crunch Platform.
-              api-token: ${{ env.X42C_API_TOKEN }}
-              # Minimum score for OpenAPI files.
-              # min-score: # optional, default is 75
-              # 42Crunch platform URL
-              platform-url: ${{ env.platformUrl }}
-              # Log level, one of: FATAL, ERROR, WARN, INFO, DEBUG
-              # log-level: # optional, default is INFO
-              # Share new API collections with everyone, one of: OFF, READ_ONLY, READ_WRITE
-              # share-everyone: # optional, default is OFF
-              # GitHub token for uploading results to Github Code Scanning
-              # github-token: # optional, default is ${{ github.token }}
-              # Upload results to Github Code Scanning
-              # upload-to-code-scanning: # optional, default is false
-              # If set to 'true', disables all local failure conditions (like minimum score) and fails execution only if the criteria defined in SQGs are not met.
-              # ignore-failures: # optional, default is false
-              # Set the root directory for the plugin
-              # root-directory: # optional
-              # Change the default collection name
-              # default-collection-name: # optional
-              # Writes Audit report in JSON format to a specified file
-              json-report: audit-action-report-${{ github.run_id }}.json
-              # List of tags to be set on the newly created APIs. Format "category1:name1 category2:name2", optional.
-              api-tags: "ApiType:Telecom"
-              # If set to 'true', forces to complete execution successfully even if a network error has occurred (such as a failure to connect to 4unch Platform, etc).
-              # ignore-network-errors: # optional, default is false
-              # If set to 'true', forces to complete execution successfully even if the failures conditions (like min-score or SQG criteria) you have set are met.
-              # skip-local-checks: # optional, default is false
-              # Writes SARIF report to a specified file
-              # sarif-report: # optional, default is 
-              # Set the maximum timeout (in seconds) for the audit report. Fail if the result isn't ready within that interval.
-              # audit-timeout: # optional
-          - name: Check Audit Summary Report
-            id: Check_Audit
-            run: |
-              echo "Audit JSON Report:"
-              echo ${{ github.workspace }}/audit-action-report-${{ github.run_id }}.json
-              cat ${{ github.workspace }}/audit-action-report-${{ github.run_id }}.json
-              apiId=$(cat ${{ github.workspace }}/audit-action-report-${{ github.run_id }}.json | jq -r '.audit.report."openapi/telco-openapi-protection.json".apiId')
-              echo "API UUID: $apiId"
-              echo "::set-output name=API_UUID::$apiId"  
-              steps:
-          - name: Reconfigure Protection
-            id: Reconfigure_Protection
-            run: |
-              echo "Reconfigure Protection"
-              echo "API UUID: ${{ steps.Check_Audit.outputs.API_UUID }}"
-              API_UUID=${{ steps.Check_Audit.outputs.API_UUID }}
-              PLATFORM_URL=${{ env.platformUrl }}
-              curl --location "$PLATFORM_URL/api/v1/apis/$API_UUID/protection" \
-              --header "Content-Type: application/json" \
-              --header "X-API-KEY: ${{ env.X42C_API_TOKEN }}"
+    steps:
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Perform API Security Audit
+      - name: 42Crunch REST API Static Security Testing
+        uses: 42Crunch/api-security-audit-action@v3
+        with:
+          api-token: ${{ env.X42C_API_TOKEN }}
+          platform-url: ${{ env.platformUrl }}
+          json-report: audit-action-report-${{ github.run_id }}.json
+
+      # Extract API_UUIDs for all OpenAPI specs
+      - name: Extract API UUIDs
+        id: extract_api_uuids
+        run: |
+          # Initialize an empty file to store API UUIDs
+          echo "[]" > api_uuids.json
+
+          # Extract API UUIDs from the audit report
+          for spec in $(jq -r 'keys[]' ${{ github.workspace }}/audit-action-report-${{ github.run_id }}.json); do
+            apiId=$(jq -r ".audit.report[\"$spec\"].apiId" ${{ github.workspace }}/audit-action-report-${{ github.run_id }}.json)
+            echo "Found API UUID for $spec: $apiId"
+            jq ". += [{\"spec\": \"$spec\", \"apiId\": \"$apiId\"}]" api_uuids.json > tmp.json && mv tmp.json api_uuids.json
+          done
+
+          # Display the collected API UUIDs
+          cat api_uuids.json
+
+      # Upload API UUIDs as an artifact
+      - name: Upload API UUIDs
+        uses: actions/upload-artifact@v3
+        with:
+          name: api-uuids
+          path: api_uuids.json
