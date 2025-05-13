@@ -60,15 +60,15 @@
         },
         "username": {
           "name": "SCAN42C_USERNAME",
-          "default": "user",
+          "from": "environment",
           "required": false,
-          "from": "environment"
+          "default": "user"
         },
         "password": {
           "name": "SCAN42C_PASSWORD",
-          "default": "password",
+          "from": "environment",
           "required": false,
-          "from": "environment"
+          "default": "password"
         }
       }
     }
@@ -622,7 +622,7 @@
                   "state": "IL",
                   "street": "123 Main St."
                 },
-                "email": "user@domain.com",
+                "email": "user3@domain.com",
                 "password": "password",
                 "username": "user3"
               }
@@ -679,7 +679,28 @@
           "requests": [
             {
               "fuzzing": true,
-              "$ref": "#/operations/UserRegistration/request"
+              "$ref": "#/operations/UserRegistration/request",
+              "responses": {
+                "201": {
+                  "expectations": {
+                    "httpStatus": 201
+                  },
+                  "variableAssignments": {
+                    "customerId": {
+                      "from": "response",
+                      "in": "body",
+                      "contentType": "json",
+                      "path": {
+                        "type": "jsonPointer",
+                        "value": "/customerId"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "$ref": "#/operations/DeleteUser/request"
             }
           ],
           "fuzzing": true
@@ -688,18 +709,6 @@
     },
     "DeleteUser": {
       "operationId": "DeleteUser",
-      "scenarios": [
-        {
-          "key": "happy.path",
-          "fuzzing": true,
-          "requests": [
-            {
-              "$ref": "#/operations/DeleteUser/request",
-              "fuzzing": true
-            }
-          ]
-        }
-      ],
       "request": {
         "operationId": "DeleteUser",
         "auth": [
@@ -708,12 +717,13 @@
         "request": {
           "type": "42c",
           "details": {
-            "url": "{{host}}/auth/user/{username}",
+            "operationId": "DeleteUser",
             "method": "DELETE",
+            "url": "{{host}}/auth/user/{username}",
             "paths": [
               {
                 "key": "username",
-                "value": "rV3j1gk"
+                "value": "{{username}}"
               }
             ]
           }
@@ -741,18 +751,112 @@
             }
           }
         }
-      }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/DeleteUser/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
     }
   },
   "authenticationDetails": [
     {
       "bearerAuth": {
         "type": "bearer",
-        "default": "bearerAuth",
+        "default": "user",
         "credentials": {
-          "bearerAuth": {
+          "user": {
             "credential": "{{bearerAuth}}",
-            "description": "bearerAuth security"
+            "requests": [
+              {
+                "$ref": "#/operations/UserLogin/request",
+                "responses": {
+                  "200": {
+                    "expectations": {
+                      "httpStatus": 200
+                    },
+                    "variableAssignments": {
+                      "bearerAuth": {
+                        "from": "response",
+                        "in": "body",
+                        "contentType": "json",
+                        "path": {
+                          "type": "jsonPointer",
+                          "value": "/token"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "user2": {
+            "credential": "{{bearerAuth}}",
+            "requests": [
+              {
+                "$ref": "#/operations/UserLogin/request",
+                "environment": {
+                  "username": "user2",
+                  "password": "password"
+                },
+                "responses": {
+                  "200": {
+                    "expectations": {
+                      "httpStatus": 200
+                    },
+                    "variableAssignments": {
+                      "bearerAuth": {
+                        "from": "response",
+                        "in": "body",
+                        "contentType": "json",
+                        "path": {
+                          "type": "jsonPointer",
+                          "value": "/token"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "admin": {
+            "credential": "{{bearerAuth}}",
+            "requests": [
+              {
+                "$ref": "#/operations/UserLogin/request",
+                "environment": {
+                  "username": "admin",
+                  "password": "password"
+                },
+                "responses": {
+                  "200": {
+                    "expectations": {
+                      "httpStatus": 200
+                    },
+                    "variableAssignments": {
+                      "bearerAuth": {
+                        "from": "response",
+                        "in": "body",
+                        "contentType": "json",
+                        "path": {
+                          "type": "jsonPointer",
+                          "value": "/token"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            ]
           }
         }
       }

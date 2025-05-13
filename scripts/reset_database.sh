@@ -9,6 +9,7 @@ DB_NAME="telco-api"
 # Generate unique customerIds for default users (lowercase UUIDs)
 ADMIN_CUSTOMER_ID=$(uuidgen | tr '[:upper:]' '[:lower:]')
 USER_CUSTOMER_ID=$(uuidgen | tr '[:upper:]' '[:lower:]')
+USER2_CUSTOMER_ID=$(uuidgen | tr '[:upper:]' '[:lower:]')
 
 # Default users with unique customerIds
 DEFAULT_USERS="[
@@ -25,6 +26,13 @@ DEFAULT_USERS="[
     \"email\": \"user@company.com\",
     \"isAdmin\": false,
     \"customerId\": \"$USER_CUSTOMER_ID\"
+  },
+  {
+    \"username\": \"user2\",
+    \"password\": \"password\",
+    \"email\": \"user2@company.com\",
+    \"isAdmin\": false,
+    \"customerId\": \"$USER2_CUSTOMER_ID\"
   }
 ]"
 

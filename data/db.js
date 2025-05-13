@@ -45,6 +45,20 @@ const seedDefaultUsers = async () => {
       await regularUser.save();
       console.log("Default regular user created");
     }
+
+        // Check if regular user already exists
+    const regularUser2Exists = await User.findOne({ username: "user2" });
+    if (!regularUser2Exists) {
+      const regularUser2 = new User({
+        username: "user2",
+        password: "password", // In a real application, hash this password
+        email: "user2@company.com",
+        isAdmin: false,
+        customerId: uuidv4(), // Generate a unique customerId
+      });
+      await regularUser2.save();
+      console.log("Default regular user 2 created");
+    }
   } catch (error) {
     console.error("Error seeding default users:", error.message);
   }

@@ -54,15 +54,41 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "token": {
-                      "$ref": "#/components/schemas/token"
-                    },
                     "message": {
                       "type": "string",
-                      "minLength": 0,
-                      "maxLength": 100,
                       "example": "Login successful",
-                      "pattern": "^Login successful$"
+                      "pattern": "^Login successful$",
+                      "minLength": 0,
+                      "maxLength": 100
+                    },
+                    "token": {
+                      "type": "string",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjdXN0b21lcklkIjoiYzU5ZWEzMTYtNmNhYS00ZDRjLWJkZGEtNzQ4NDk0MjY2NDc3IiwiaXNBZG1pbiI6ZmFsc2UsImlhdCI6MTc0Njg5MDQxNiwiZXhwIjoxNzQ2ODk0MDE2fQ.YKvGiSCB9OawrVFZBJeST5xGbOzPOEOdTHbPk8ATDyQ",
+                      "pattern": "^([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_\\-\\+\\/=]{4,})",
+                      "minLength": 25,
+                      "maxLength": 1000
+                    },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "username": {
+                          "$ref": "#/components/schemas/username"
+                        },
+                        "password": {
+                          "$ref": "#/components/schemas/password"
+                        },
+                        "email": {
+                          "$ref": "#/components/schemas/email"
+                        },
+                        "isAdmin": {
+                          "type": "boolean",
+                          "example": false
+                        },
+                        "customerId": {
+                          "$ref": "#/components/schemas/customerId"
+                        }
+                      },
+                      "additionalProperties": false
                     }
                   },
                   "additionalProperties": false
@@ -88,7 +114,7 @@
           "500": {
             "$ref": "#/components/responses/ResponseError500"
           },
-          "default":{
+          "default": {
             "$ref": "#/components/responses/DefaultErrorResponse"
           }
         },
@@ -139,14 +165,29 @@
                   "properties": {
                     "message": {
                       "type": "string",
-                      "example": "User registered",
-                      "pattern": "^User registered$",
+                      "example": "User registered successfully",
+                      "pattern": "^User registered successfully$",
                       "minLength": 0,
-                      "maxLength": 100
+                      "maxLength": 28
                     },
-                    "userId": {
-                      "type": "integer",
-                      "example": 101
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "username": {
+                          "$ref": "#/components/schemas/username"
+                        },
+                        "email": {
+                          "$ref": "#/components/schemas/email"
+                        },
+                        "isAdmin": {
+                          "type": "boolean",
+                          "example": false
+                        },
+                        "customerId": {
+                          "$ref": "#/components/schemas/customerId"
+                        }
+                      },
+                      "additionalProperties": false
                     }
                   },
                   "additionalProperties": false
@@ -172,7 +213,7 @@
           "500": {
             "$ref": "#/components/responses/ResponseError500"
           },
-          "default":{
+          "default": {
             "$ref": "#/components/responses/DefaultErrorResponse"
           }
         },
@@ -321,7 +362,7 @@
           "500": {
             "$ref": "#/components/responses/ResponseError500"
           },
-          "default":{
+          "default": {
             "$ref": "#/components/responses/DefaultErrorResponse"
           }
         },
@@ -399,7 +440,7 @@
           "500": {
             "$ref": "#/components/responses/ResponseError500"
           },
-          "default":{
+          "default": {
             "$ref": "#/components/responses/DefaultErrorResponse"
           }
         },
@@ -470,7 +511,7 @@
           "500": {
             "$ref": "#/components/responses/ResponseError500"
           },
-          "default":{
+          "default": {
             "$ref": "#/components/responses/DefaultErrorResponse"
           }
         },
@@ -565,7 +606,7 @@
           "500": {
             "$ref": "#/components/responses/ResponseError500"
           },
-          "default":{
+          "default": {
             "$ref": "#/components/responses/DefaultErrorResponse"
           }
         },
@@ -626,7 +667,7 @@
           "500": {
             "$ref": "#/components/responses/ResponseError500"
           },
-          "default":{
+          "default": {
             "$ref": "#/components/responses/DefaultErrorResponse"
           }
         },
@@ -806,26 +847,26 @@
       "MessageObject": {
         "type": "object",
         "properties": {
-            "message": {
-                "$ref": "#/components/schemas/ResponseMessage"
-            }
+          "message": {
+            "$ref": "#/components/schemas/ResponseMessage"
+          }
         },
         "additionalProperties": false
       },
       "ResponseMessage": {
-      "type": "string",
-      "pattern": "^[A-Za-z0-9\/\\.\"', :_]{1,100}$"
+        "type": "string",
+        "pattern": "^[A-Za-z0-9\/\\.\"', :_]{1,100}$"
       }
     },
     "responses": {
       "DefaultErrorResponse": {
         "description": "Unexpected Error",
         "content": {
-            "application/json": {
-                "schema": {
-                    "$ref": "#/components/schemas/MessageObject"
-                }
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MessageObject"
             }
+          }
         }
       },
       "ResponseError400": {
