@@ -27,18 +27,18 @@ jobs:
           name: api-uuids
           path: ./api_uuids.json
 
-      # Reconfigure Protection for telco-openapi-protection.json
+      # Reconfigure Protection for telco-openapi-remediated.json
       - name: Reconfigure Protection for telco-openapi-protection.json
         run: |
           # Filter the artifact for the specific spec
-          apiId=$(jq -r '.[] | select(.spec == "openapi/telco-openapi-protection.json") | .apiId' api_uuids.json)
+          apiId=$(jq -r '.[] | select(.spec == "openapi/telco-openapi-remediated.json") | .apiId' api_uuids.json)
 
           if [ -z "$apiId" ]; then
-            echo "API UUID for telco-openapi-protection.json not found in artifact."
+            echo "API UUID for telco-openapi-remediated.json not found in artifact."
             exit 1
           fi
 
-          echo "Reconfiguring protection for telco-openapi-protection.json (API UUID: $apiId)"
+          echo "Reconfiguring protection for telco-openapi-remediated.json (API UUID: $apiId)"
           curl --location "$PLATFORM_URL/api/v1/apis/$apiId/protection" \
             --header "Content-Type: application/json" \
             --header "X-API-KEY: ${{ env.X42C_API_TOKEN }}" \
