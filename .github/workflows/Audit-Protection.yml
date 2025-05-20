@@ -65,8 +65,7 @@ jobs:
               echo ${{ github.workspace }}/audit-action-report-${{ github.run_id }}.json
               cat ${{ github.workspace }}/audit-action-report-${{ github.run_id }}.json
               apiId=$(cat ${{ github.workspace }}/audit-action-report-${{ github.run_id }}.json | jq -r '.audit.report."openapi/telco-openapi-protection.json".apiId')
-              echo "API UUID: $apiId"
-              echo "::set-output name=API_UUID::$apiId"  
+              echo "API UUID: $apiId"  
               steps:
           - name: Reconfigure Protection
             id: Reconfigure_Protection
