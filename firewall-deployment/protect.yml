@@ -13,7 +13,7 @@ services:
     environment:
       - SERVER_NAME=localhost
       - LISTEN_PORT=443
-      - PROTECTION_TOKEN=${PROTECTION_TOKEN}
+      - PROTECTION_TOKEN=${PROTECTION_TOKEN_PROTECTION}
       - GUARDIAN_NODE_NAME=Local-Firewall
       - GUARDIAN_INSTANCE_NAME=Local-Firewall
       - LISTEN_SSL_CERT=firewall-cert.pem
@@ -21,7 +21,4 @@ services:
       - LOG_LEVEL=DEBUG
       - TARGET_URL=https://host.docker.internal:3000
       - PRESERVE_HOST=ON
-    # depends_on:
-    #   - database
-    #   - apiserver
     env_file: ".env"
