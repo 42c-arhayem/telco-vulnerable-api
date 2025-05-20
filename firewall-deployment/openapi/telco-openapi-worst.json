@@ -325,8 +325,7 @@
                       "minLength": 0,
                       "maxLength": 100
                     }
-                  },
-                  "additionalProperties": false
+                  }
                 }
               }
             }
@@ -402,10 +401,8 @@
                       "status": {
                         "$ref": "#/components/schemas/status"
                       }
-                    },
-                    "additionalProperties": false
-                  },
-                  "maxItems": 4
+                    }
+                  }
                 }
               }
             }
@@ -475,8 +472,7 @@
                     "orderDate": {
                       "$ref": "#/components/schemas/orderDate"
                     }
-                  },
-                  "additionalProperties": false
+                  }
                 }
               }
             }
@@ -562,11 +558,9 @@
                         "priority": {
                           "$ref": "#/components/schemas/priority"
                         }
-                      },
-                      "additionalProperties": false
+                      }
                     }
-                  },
-                  "additionalProperties": false
+                  }
                 }
               }
             }
@@ -622,8 +616,7 @@
                     "message": {
                       "type": "string"
                     }
-                  },
-                  "additionalProperties": false
+                  }
                 }
               }
             }
@@ -719,8 +712,7 @@
           "country": {
             "type": "string"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "productId": {
         "type": "string"
@@ -752,8 +744,7 @@
           "message": {
             "$ref": "#/components/schemas/ResponseMessage"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "ResponseMessage": {
         "type": "string"
