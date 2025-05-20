@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "Telco Vulnerable API Fully Secured",
+    "title": "Secured Telco Vulnerable API",
     "version": "1.0.0",
     "description": "An intentionally vulnerable API inspired by TMF 622, designed to eventually showcase API security issues like BOLA,BOPLA, BFLA, and other OWASP API Top 10 vulnerabilities."
   },

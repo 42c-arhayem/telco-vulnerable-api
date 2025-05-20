@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "Telco Vulnerable API Insecure",
+    "title": "Worst Telco Vulnerable API",
     "version": "1.0.0",
     "description": "An intentionally vulnerable API inspired by TMF 622, designed to eventually showcase API security issues like BOLA,BOPLA, BFLA, and other OWASP API Top 10 vulnerabilities."
   },
@@ -37,7 +37,6 @@
                     "$ref": "#/components/schemas/password"
                   }
                 },
-                "additionalProperties": false,
                 "required": [
                   "username",
                   "password"
@@ -78,11 +77,9 @@
                         "customerId": {
                           "$ref": "#/components/schemas/customerId"
                         }
-                      },
-                      "additionalProperties": false
+                      }
                     }
-                  },
-                  "additionalProperties": false
+                  }
                 }
               }
             }
@@ -141,8 +138,7 @@
                   "username",
                   "password",
                   "email"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -178,11 +174,9 @@
                         "customerId": {
                           "$ref": "#/components/schemas/customerId"
                         }
-                      },
-                      "additionalProperties": false
+                      }
                     }
-                  },
-                  "additionalProperties": false
+                  }
                 }
               }
             }
@@ -233,8 +227,7 @@
                     "message": {
                       "type": "string"
                     }
-                  },
-                  "additionalProperties": false
+                  }
                 }
               }
             }
@@ -252,8 +245,7 @@
                     "message": {
                       "type": "string"
                     }
-                  },
-                  "additionalProperties": false
+                  }
                 }
               }
             }
@@ -295,8 +287,7 @@
                   "productId",
                   "quantity",
                   "customerId"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -528,8 +519,7 @@
                   "productId": {
                     "$ref": "#/components/schemas/productId"
                   }
-                },
-                "additionalProperties": false
+                }
               }
             }
           }
