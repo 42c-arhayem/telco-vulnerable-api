@@ -75,6 +75,6 @@ jobs:
               echo "API UUID: ${{ steps.Check_Audit.outputs.API_UUID }}"
               API_UUID=${{ steps.Check_Audit.outputs.API_UUID }}
               PLATFORM_URL=${{ env.platformUrl }}
-              curl --location "$PLATFORM_URL/api/v1/apis/$API_UUID/protection" \
+              curl --request POST "$PLATFORM_URL/api/v1/apis/$API_UUID/protection" \
                 --header "Content-Type: application/json" \
                 --header "X-API-KEY: ${{ env.X42C_API_TOKEN }}"
