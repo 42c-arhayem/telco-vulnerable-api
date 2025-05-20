@@ -71,7 +71,7 @@ jobs:
           - name: Reconfigure Protection
             id: Reconfigure_Protection
             run: |
-              echo "Reconfigure Protection"
+              echo "Reconfiguring Protection"
               echo "API UUID: ${{ steps.Check_Audit.outputs.API_UUID }}"
               API_UUID=${{ steps.Check_Audit.outputs.API_UUID }}
               PLATFORM_URL=${{ env.platformUrl }}
