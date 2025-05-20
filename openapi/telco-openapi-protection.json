@@ -66,14 +66,8 @@
                         "username": {
                           "$ref": "#/components/schemas/username"
                         },
-                        "password": {
-                          "$ref": "#/components/schemas/password"
-                        },
                         "email": {
                           "$ref": "#/components/schemas/email"
-                        },
-                        "isAdmin": {
-                          "type": "boolean"
                         },
                         "customerId": {
                           "$ref": "#/components/schemas/customerId"
