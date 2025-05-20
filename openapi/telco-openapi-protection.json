@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "Worst Telco Vulnerable API",
+    "title": "Insecure Telco Vulnerable API",
     "version": "1.0.0",
     "description": "An intentionally vulnerable API inspired by TMF 622, designed to eventually showcase API security issues like BOLA,BOPLA, BFLA, and other OWASP API Top 10 vulnerabilities."
   },
@@ -37,6 +37,7 @@
                     "$ref": "#/components/schemas/password"
                   }
                 },
+                "additionalProperties": false,
                 "required": [
                   "username",
                   "password"
@@ -77,9 +78,11 @@
                         "customerId": {
                           "$ref": "#/components/schemas/customerId"
                         }
-                      }
+                      },
+                      "additionalProperties": false
                     }
-                  }
+                  },
+                  "additionalProperties": false
                 }
               }
             }
@@ -138,7 +141,8 @@
                   "username",
                   "password",
                   "email"
-                ]
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -174,9 +178,11 @@
                         "customerId": {
                           "$ref": "#/components/schemas/customerId"
                         }
-                      }
+                      },
+                      "additionalProperties": false
                     }
-                  }
+                  },
+                  "additionalProperties": false
                 }
               }
             }
@@ -227,7 +233,8 @@
                     "message": {
                       "type": "string"
                     }
-                  }
+                  },
+                  "additionalProperties": false
                 }
               }
             }
@@ -244,9 +251,6 @@
           "415": {
             "$ref": "#/components/responses/ResponseError415"
           },
-          "429": {
-            "$ref": "#/components/responses/ResponseError429"
-          },
           "403": {
             "$ref": "#/components/responses/ResponseError403"
           },
@@ -260,7 +264,8 @@
                     "message": {
                       "type": "string"
                     }
-                  }
+                  },
+                  "additionalProperties": false
                 }
               }
             }
@@ -302,7 +307,8 @@
                   "productId",
                   "quantity",
                   "customerId"
-                ]
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -325,7 +331,8 @@
                       "minLength": 0,
                       "maxLength": 100
                     }
-                  }
+                  },
+                  "additionalProperties": false
                 }
               }
             }
@@ -401,8 +408,10 @@
                       "status": {
                         "$ref": "#/components/schemas/status"
                       }
-                    }
-                  }
+                    },
+                    "additionalProperties": false
+                  },
+                  "maxItems": 4
                 }
               }
             }
@@ -472,7 +481,8 @@
                     "orderDate": {
                       "$ref": "#/components/schemas/orderDate"
                     }
-                  }
+                  },
+                  "additionalProperties": false
                 }
               }
             }
@@ -530,7 +540,8 @@
                   "productId": {
                     "$ref": "#/components/schemas/productId"
                   }
-                }
+                },
+                "additionalProperties": false
               }
             }
           }
@@ -558,9 +569,11 @@
                         "priority": {
                           "$ref": "#/components/schemas/priority"
                         }
-                      }
+                      },
+                      "additionalProperties": false
                     }
-                  }
+                  },
+                  "additionalProperties": false
                 }
               }
             }
@@ -616,7 +629,8 @@
                     "message": {
                       "type": "string"
                     }
-                  }
+                  },
+                  "additionalProperties": false
                 }
               }
             }
@@ -712,7 +726,8 @@
           "country": {
             "type": "string"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "productId": {
         "type": "string"
@@ -744,7 +759,8 @@
           "message": {
             "$ref": "#/components/schemas/ResponseMessage"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "ResponseMessage": {
         "type": "string"
