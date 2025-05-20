@@ -232,6 +232,21 @@
               }
             }
           },
+          "401": {
+            "$ref": "#/components/responses/ResponseError401"
+          },
+          "400": {
+            "$ref": "#/components/responses/ResponseError400"
+          },
+          "406": {
+            "$ref": "#/components/responses/ResponseError406"
+          },
+          "415": {
+            "$ref": "#/components/responses/ResponseError415"
+          },
+          "429": {
+            "$ref": "#/components/responses/ResponseError429"
+          },
           "403": {
             "$ref": "#/components/responses/ResponseError403"
           },

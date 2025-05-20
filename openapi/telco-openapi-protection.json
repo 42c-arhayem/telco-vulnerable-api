@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "Telco Vulnerable API Insecure",
+    "title": "Worst Telco Vulnerable API",
     "version": "1.0.0",
     "description": "An intentionally vulnerable API inspired by TMF 622, designed to eventually showcase API security issues like BOLA,BOPLA, BFLA, and other OWASP API Top 10 vulnerabilities."
   },
@@ -231,6 +231,21 @@
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/ResponseError401"
+          },
+          "400": {
+            "$ref": "#/components/responses/ResponseError400"
+          },
+          "406": {
+            "$ref": "#/components/responses/ResponseError406"
+          },
+          "415": {
+            "$ref": "#/components/responses/ResponseError415"
+          },
+          "429": {
+            "$ref": "#/components/responses/ResponseError429"
           },
           "403": {
             "$ref": "#/components/responses/ResponseError403"

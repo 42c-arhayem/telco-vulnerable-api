@@ -252,6 +252,18 @@
               }
             }
           },
+          "400": {
+            "$ref": "#/components/responses/ResponseError400"
+          },
+          "401": {
+            "$ref": "#/components/responses/ResponseError401"
+          },
+          "406": {
+            "$ref": "#/components/responses/ResponseError406"
+          },
+          "415": {
+            "$ref": "#/components/responses/ResponseError415"
+          },
           "403": {
             "$ref": "#/components/responses/ResponseError403"
           },
