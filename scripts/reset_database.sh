@@ -21,14 +21,14 @@ DEFAULT_USERS="[
     \"customerId\": \"$ADMIN_CUSTOMER_ID\"
   },
   {
-    \"username\": \"user\",
+    \"username\": \"username\",
     \"password\": \"password\",
     \"email\": \"user@company.com\",
     \"isAdmin\": false,
     \"customerId\": \"$USER_CUSTOMER_ID\"
   },
   {
-    \"username\": \"user2\",
+    \"username\": \"username2\",
     \"password\": \"password\",
     \"email\": \"user2@company.com\",
     \"isAdmin\": false,

@@ -575,8 +575,8 @@
                         "quantity": {
                           "$ref": "#/components/schemas/quantity"
                         },
-                        "priority": {
-                          "$ref": "#/components/schemas/priority"
+                        "productId": {
+                          "$ref": "#/components/schemas/productId"
                         }
                       },
                       "additionalProperties": false
@@ -719,8 +719,8 @@
       "username": {
         "type": "string",
         "pattern": "^[\\sa-zA-Z0-9]{5,35}$",
-        "example": "user",
-        "minLength": 3,
+        "example": "username",
+        "minLength": 5,
         "maxLength": 35
       },
       "password": {
@@ -847,13 +847,28 @@
         "x-42c-format": "o:date-time"
       },
       "MessageObject": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "$ref": "#/components/schemas/ResponseMessage"
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "message": {
+                "$ref": "#/components/schemas/ResponseMessage"
+              }
+            },
+            "required": ["message"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "$ref": "#/components/schemas/ResponseMessage"
+              }
+            },
+            "required": ["error"],
+            "additionalProperties": false
           }
-        },
-        "additionalProperties": false
+        ]
       },
       "ResponseMessage": {
         "type": "string",
