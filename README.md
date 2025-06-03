@@ -1,92 +1,73 @@
-Overview
-The Telco Vulnerable API is an intentionally vulnerable API designed to demonstrate the OWASP Top 10 API Security Issues in the context of a telco company. This API provides functionalities for managing product orders and user authentication while showcasing common vulnerabilities that can lead to severe security risks.
 
-API Functionalities
-1. User Authentication
-Endpoints:
-POST /auth/register
-Allows users to register with a username, password, and email.
-Example Request:
+# Telco Vulnerable API
 
-Example Response:
+A set of telecommunications API endpoints intentionally designed with security vulnerabilities for educational and testing purposes.
 
-POST /auth/login
-Allows users to log in with their credentials and receive a JWT token.
-Example Request:
+---
 
-Example Response:
+## 📘 Introduction
 
-2. Product Order Management
-Endpoints:
-GET /productOrder
-Retrieves all product orders with optional filters (customerId, status).
-Example Request:
-GET /productOrder?customerId=a83a29f5-0d63-46f2-8f2e-44c2f1d2e07e&status=completed
+The **Telco Vulnerable API** simulates a telecommunications service provider's backend. It allows users to register, log in, and manage product orders, mimicking real-world telco operations. The API is designed to demonstrate common API security issues, especially those listed in the OWASP API Security Top 10, including BOLA, BFLA, mass assignment, excessive data exposure, SSRF, and more.
 
-GET /productOrder/:orderId
-Retrieves details of a specific product order by orderId.
+If you have feature requests or issues, please [create an issue](https://github.com/your-org/telco-vulnerable-api/issues/new).
 
-POST /productOrder
-Creates a new product order.
-Example Request:
+---
 
-PATCH /productOrder/:orderId
-Updates an existing product order by orderId.
+## 🚀 Overview of the API Endpoints
 
-DELETE /productOrder/:orderId
-Deletes a product order by orderId.
+- **Register**: Create a new customer account.
+- **Login**: Authenticate and retrieve an access token.
+- **Product Orders**: Create, view, update, and cancel product orders.
+- **Webhooks**: Simulate webhook event handling. (to be developed)
+- **Debug**: Access debug endpoints for testing and internal tooling. (to be developed)
 
-Vulnerabilities Demonstrated
-1. Broken Object Level Authorization (BOLA)
-Endpoints Affected:
-GET /productOrder/:orderId, DELETE /productOrder/:orderId
-Description:
-No ownership checks are implemented, allowing any user to access or delete another user's orders by providing the orderId.
-2. Broken User Authentication
-Endpoints Affected:
-POST /auth/login
-Description:
-Weak password validation and no rate limiting allow brute force attacks. Passwords are stored in plaintext.
-3. Excessive Data Exposure
-Endpoints Affected:
-POST /auth/login
-Description:
-The API exposes sensitive user data, including password and isAdmin fields, in the login response.
-4. Broken Function Level Authorization (BFLA)
-Endpoints Affected:
-POST /productOrder
-Description:
-Any user can create orders for other customers by specifying a different customerId in the request body.
-5. Mass Assignment
-Endpoints Affected:
-POST /auth/register
-Description:
-Users can escalate privileges by setting isAdmin: true in the request body during registration.
-6. Security Misconfiguration
-Endpoints Affected:
-GET /debug/env
-Description:
-The API exposes sensitive environment variables, including database credentials and API keys.
-7. Injection
-Endpoints Affected:
-GET /productOrder
-Description:
-The API directly uses user input in database queries, allowing NoSQL injection attacks.
-8. Improper Assets Management
-Endpoints Affected:
-/v1/productOrder, /v2/productOrder
-Description:
-Older API versions are not deprecated, exposing unpatched vulnerabilities.
-9. Insufficient Logging & Monitoring
-Endpoints Affected:
-POST /auth/login, GET /productOrder/:orderId
-Description:
-The API does not log failed login attempts or unauthorized access attempts, making it difficult to detect attacks.
-10. Server-Side Request Forgery (SSRF)
-Endpoints Affected:
-POST /webhook/test
-Description:
-The API allows users to fetch external URLs without validation, enabling attackers to make requests to internal services.
+---
 
-Disclaimer
-This API is intentionally vulnerable and should not be used in production environments. It is designed for educational purposes to demonstrate common API security issues and their impact.
+## 🛠️ Get Started
+
+### Basic Mode
+
+1. Clone this repository to your local machine.
+2. Ensure Docker Desktop (or compatible container software) is running.
+3. Start the API Server(Run command in repo root directory):
+   ```bash
+   npm start
+   ```
+4. Update PROTECTION_TOKEN_PROTECTION env. variable under ../firewall-deployment/.env with your Protection Token generated in the SaaS platform.
+4. Deploy the Firewall and its dependencies using Docker Compose:
+   ```bash
+   docker-compose -f ../firewall-deployment/protect.yml up
+   ```
+
+---
+
+## 📦 Project Resources
+
+### OpenAPI Definitions
+
+- **Vulnerable Version**: For demonstrating Audit failures.
+- **Secure Version**: For use with Conformance Scan and best-practice checks.
+
+### Seeded User Accounts
+
+- Two test users are included in the MongoDB instance for immediate login and testing.
+
+### Postman Assets
+
+- A collection and environment file are available for testing API endpoints.
+
+---
+
+## Protection Demonstration
+
+| OAS Audit Score | 1 (No Security + No Schemas) | 31 (Security + No Schemas) | 32 (Security + additional properties + No schemas) | 100 (Security + additional properties + schemas) |
+| --- | --- | --- | --- | --- |
+| API2- Broken Auth | <span style="color: rgb(224, 62, 45);">No</span> | <span style="color: rgb(45, 194, 107);">Yes</span> | <span style="color: rgb(45, 194, 107);">Yes</span> | <span style="color: rgb(45, 194, 107);">Yes</span> |
+| API3 - BOPLA (Mass Assignment) | <span style="color: rgb(224, 62, 45);">No</span> | <span style="color: rgb(224, 62, 45);">No</span> | <span style="color: rgb(45, 194, 107);">Yes</span> | <span style="color: rgb(45, 194, 107);">Yes</span> |
+| API3 - BOPLA (Excessive Data Exposure) | <span style="color: rgb(224, 62, 45);">No</span> | <span style="color: rgb(224, 62, 45);">No</span> | <span style="color: rgb(45, 194, 107);">Yes</span> | <span style="color: rgb(45, 194, 107);">Yes</span> |
+| API7 - SSRF | <span style="color: rgb(224, 62, 45);">No</span> | <span style="color: rgb(224, 62, 45);">No</span> | <span style="color: rgb(224, 62, 45);">No</span> | <span style="color: rgb(45, 194, 107);">Yes</span> |
+| API8 - Security Misconfiguration  <br>(PathTraversal/ Undocumented Endpoints) | <span style="color: rgb(45, 194, 107);">Yes</span> | <span style="color: rgb(45, 194, 107);">Yes</span> | <span style="color: rgb(45, 194, 107);">Yes</span> | <span style="color: rgb(45, 194, 107);">Yes</span> |
+| API8 - Security Misconfiguration (Invalid body Type) | <span style="color: rgb(45, 194, 107);">Yes</span> | <span style="color: rgb(45, 194, 107);">Yes</span> | <span style="color: rgb(45, 194, 107);">Yes</span> | <span style="color: rgb(45, 194, 107);">Yes</span> |
+| API9 - Improper Inventory Management (Undocumented Methods) | <span style="color: rgb(45, 194, 107);">Yes</span> | <span style="color: rgb(45, 194, 107);">Yes</span> | <span style="color: rgb(45, 194, 107);">Yes</span> | <span style="color: rgb(45, 194, 107);">Yes</span> |
+
+&nbsp;
