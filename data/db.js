@@ -36,7 +36,7 @@ const seedDefaultUsers = async () => {
     const regularUserExists = await User.findOne({ username: "user" });
     if (!regularUserExists) {
       const regularUser = new User({
-        username: "user",
+        username: "username",
         password: "password", // In a real application, hash this password
         email: "user@company.com",
         isAdmin: false,
@@ -50,7 +50,7 @@ const seedDefaultUsers = async () => {
     const regularUser2Exists = await User.findOne({ username: "user2" });
     if (!regularUser2Exists) {
       const regularUser2 = new User({
-        username: "user2",
+        username: "username2",
         password: "password", // In a real application, hash this password
         email: "user2@company.com",
         isAdmin: false,
