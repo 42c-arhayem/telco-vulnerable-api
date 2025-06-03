@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "Insecure Telco Vulnerable API",
+    "title": "Low Security Telco Vulnerable API",
     "version": "1.0.0",
     "description": "An intentionally vulnerable API inspired by TMF 622, designed to eventually showcase API security issues like BOLA,BOPLA, BFLA, and other OWASP API Top 10 vulnerabilities."
   },
@@ -11,6 +11,12 @@
       "description": "Local development server"
     }
   ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "x-42c-accept-empty-security": true,
   "paths": {
     "/auth/login": {
       "post": {
@@ -99,7 +105,8 @@
           "default": {
             "$ref": "#/components/responses/DefaultErrorResponse"
           }
-        }
+        },
+        "security": []
       }
     },
     "/auth/register": {
@@ -195,7 +202,8 @@
           "default": {
             "$ref": "#/components/responses/DefaultErrorResponse"
           }
-        }
+        },
+        "security": []
       }
     },
     "/auth/user/{username}": {
@@ -260,7 +268,12 @@
           "500": {
             "$ref": "#/components/responses/ResponseError500"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/productOrder": {
@@ -341,7 +354,12 @@
           "default": {
             "$ref": "#/components/responses/DefaultErrorResponse"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       },
       "get": {
         "summary": "List Product Orders",
@@ -413,7 +431,12 @@
           "default": {
             "$ref": "#/components/responses/DefaultErrorResponse"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/productOrder/{orderId}": {
@@ -478,7 +501,12 @@
           "default": {
             "$ref": "#/components/responses/DefaultErrorResponse"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       },
       "patch": {
         "summary": "Update Product Order",
@@ -561,7 +589,12 @@
           "default": {
             "$ref": "#/components/responses/DefaultErrorResponse"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       },
       "delete": {
         "summary": "Cancel Product Order",
@@ -612,7 +645,12 @@
           "default": {
             "$ref": "#/components/responses/DefaultErrorResponse"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     }
   },
@@ -802,6 +840,13 @@
             }
           }
         }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
       }
     }
   }
