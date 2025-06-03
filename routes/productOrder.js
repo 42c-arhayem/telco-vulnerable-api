@@ -5,7 +5,7 @@ const mongoose = require("mongoose"); // Import mongoose for ObjectId validation
 const router = express.Router();
 
 // List all orders with optional filters
-router.get("/", authenticate, async (req, res) => {
+router.get("/", async (req, res) => {
   const { customerId, status } = req.query;
 
   try {
