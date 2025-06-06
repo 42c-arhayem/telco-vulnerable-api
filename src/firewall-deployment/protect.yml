@@ -13,7 +13,7 @@ services:
     environment:
       - SERVER_NAME=localhost
       - LISTEN_PORT=443
-      - PROTECTION_TOKEN=${PROTECTION_TOKEN_PROTECTION}
+      - PROTECTION_TOKEN=${PROTECTION_TOKEN}
       - GUARDIAN_NODE_NAME=Local-Firewall
       - GUARDIAN_INSTANCE_NAME=Local-Firewall
       - LISTEN_SSL_CERT=firewall-cert.pem

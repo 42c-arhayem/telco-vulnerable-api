@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Navigate to the firewall deployment directory
-cd "$(dirname "$0")/../firewall-deployment" || exit 1
+cd "$(dirname "$0")/../src/firewall-deployment" || exit 1
 
 echo "Stopping and removing existing firewall containers..."
 docker-compose -p 42crunch -f protect.yml down
