@@ -72,7 +72,7 @@ If you have feature requests or issues, please [create an issue](https://github.
 
 ---
 
-## 🔐 Vulnerabilities Demonstrated
+## 🔐 Vulnerabilities Demonstration
 
 | Vulnerability Description | OWASP Category | Operation | Endpoint | Source Code |
 |---------------------------|----------------|-----------|----------|-------------|

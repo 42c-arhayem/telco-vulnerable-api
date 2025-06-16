@@ -1,2 +1,4 @@
 *.DS_Store
 *.env
+old-README.md
+*.42c
