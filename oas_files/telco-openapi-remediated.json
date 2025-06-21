@@ -238,7 +238,7 @@
                     "message": {
                       "type": "string",
                       "example": "User deleted successfully.",
-                      "pattern": "^User deleted successfully.$",
+                      "pattern": "^User deleted successfully$",
                       "minLength": 0,
                       "maxLength": 100
                     }
