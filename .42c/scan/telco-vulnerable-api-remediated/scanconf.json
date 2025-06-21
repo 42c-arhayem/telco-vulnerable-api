@@ -679,8 +679,8 @@
             "requestBody": {
               "mode": "json",
               "json": {
-                "password": "password",
-                "username": "username"
+                "password": "{{password}}",
+                "username": "{{username}}"
               }
             }
           }
@@ -867,8 +867,8 @@
           },
           "variableAssignments": {
             "customerId": {
-              "from": "response",
               "in": "body",
+              "from": "response",
               "contentType": "json",
               "path": {
                 "type": "jsonPointer",
@@ -1032,6 +1032,15 @@
       ],
       "target": [
         "bearerAuth/user2"
+      ]
+    },
+    "bfla": {
+      "key": "authentication-swapping-bfla",
+      "source": [
+        "bearerAuth/admin"
+      ],
+      "target": [
+        "bearerAuth/user"
       ]
     }
   }

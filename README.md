@@ -50,11 +50,27 @@ If you have feature requests or issues, please [create an issue](https://github.
 
 ### Seeded User Accounts
 
-- Two test users are included in the MongoDB instance for immediate login and testing.
+- Three test users are included in the MongoDB instance for immediate login and testing.
+```bash
+regular test user
+username = username
+password = password
+```
 
+```bash
+regular test user 2
+username = username2
+password = password
+```
+
+```bash
+admin test user
+username = admin
+password = password
+```
 ### Postman Assets
 
-- A collection and environment file are available for testing API endpoints.
+- A collection is available for testing API endpoints.
 
 ---
 
