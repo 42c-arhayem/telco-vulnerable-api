@@ -76,11 +76,11 @@ If you have feature requests or issues, please [create an issue](https://github.
 
 | Vulnerability Description | OWASP Category | Operation | Endpoint | Source Code |
 |---------------------------|----------------|-----------|----------|-------------|
-| A user can access or modify another user's product order | API-1 (BOLA) | GET/PUT/DELETE | /productOrder/{orderId} | productOrderController.js |
-| No function-level authorization on admin-only endpoints | API-5 (BFLA) | DELETE | /auth/user/{username} | authController.js |
+| A user can access or modify another user's product order | API-1 (BOLA) | PATCH/DELETE | /productOrder/{orderId} | productOrderController.js |
 | Mass assignment allows hidden fields to be set | API-3 (Mass Assignment) | PATCH | /productOrder/{orderId} | productOrderController.js |
 | Excessive data exposure in order responses | API-3 (Excessive Data Exposure) | GET | /productOrder/{orderId} | productOrderController.js |
 | No rate limiting on order creation | API-4 (Unrestricted Resource Consumption) | POST | /productOrder | productOrderController.js |
+| No function-level authorization on admin-only endpoints | API-5 (BFLA) | DELETE | /auth/user/{username} | authController.js |
 | SSRF via webhook endpoint | API-7 (SSRF) | POST | /webhook | webhookController.js |
 | Security misconfiguration: unsupported HTTP verbs not blocked | API-8 (Security Misconfiguration) | Various | /auth/login | authRoutes.js |
 | Path traversal in debug endpoints | API-9 (Improper Assets Management) | GET | /debug/files | debugController.js |

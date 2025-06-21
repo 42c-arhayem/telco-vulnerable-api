@@ -57,7 +57,7 @@
           "name": "SCAN42C_HOST",
           "from": "environment",
           "required": false,
-          "default": "https://localhost:3000"
+          "default": "https://cute-noble-boar.ngrok-free.app"
         },
         "username": {
           "name": "SCAN42C_USERNAME",
@@ -589,7 +589,7 @@
             "requestBody": {
               "mode": "json",
               "json": {
-                "productId": "SIM{{$randomuint}}",
+                "productId": "SIM001",
                 "quantity": 10
               }
             }
@@ -867,8 +867,8 @@
           },
           "variableAssignments": {
             "customerId": {
-              "in": "body",
               "from": "response",
+              "in": "body",
               "contentType": "json",
               "path": {
                 "type": "jsonPointer",
