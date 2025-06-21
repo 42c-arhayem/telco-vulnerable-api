@@ -64,7 +64,7 @@ jobs:
               echo "Audit JSON Report:"
               echo ${{ github.workspace }}/audit-action-report-${{ github.run_id }}.json
               cat ${{ github.workspace }}/audit-action-report-${{ github.run_id }}.json
-              apiId=$(jq -r '.audit.report["openapi/telco-openapi-protection.json"].apiId' ${{ github.workspace }}/audit-action-report-${{ github.run_id }}.json)
+              apiId=$(jq -r '.audit.report["oas_files/telco-openapi-protection.json"].apiId' ${{ github.workspace }}/audit-action-report-${{ github.run_id }}.json)
               echo "API UUID: $apiId"
               echo "API_UUID=$apiId" >> $GITHUB_OUTPUT
 
