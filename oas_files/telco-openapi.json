@@ -791,11 +791,7 @@
       "customerId": {
         "type": "string",
         "format": "uuid",
-        "example": "a83a29f5-0d63-46f2-8f2e-44c2f1d2e07e",
-        "minLength": 36,
-        "maxLength": 36,
-        "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$",
-        "x-42c-format": "o:uuid"
+        "example": "123e4567-e89b-12d3-a456-426614174000"
       },
       "quantity": {
         "type": "integer",
