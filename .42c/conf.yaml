@@ -1,3 +1,5 @@
 apis:
   openapi/telco-openapi-remediated.json:
     alias: telco-vulnerable-api
+  oas_files/telco-openapi-remediated.json:
+    alias: telco-vulnerable-api-remediated

@@ -1,0 +1,1038 @@
+{
+  "version": "2.0.0",
+  "runtimeConfiguration": {
+    "environment": "default",
+    "laxTestingModeEnabled": false,
+    "apiConnectivityCheck": true,
+    "logLevel": "error",
+    "logDestination": "stdout+platform",
+    "logMaxFileSize": 2147483648,
+    "requestHeaderNameRequestId": "x-scan-request-id",
+    "requestHeaderNameScenarioId": "x-scan-scenario-id",
+    "requestHeaderNameRequestType": "x-scan-request-type",
+    "requestFlowrate": 100,
+    "requestTimeout": 30,
+    "requestTlsInsecureSkipVerify": true,
+    "responseFollowRedirection": false,
+    "responseMaxBodySizeScan": 10485760,
+    "happyPathOnly": false,
+    "maxRequestRetryAttempts": 5,
+    "maxScanDuration": 1800,
+    "memoryLimit": 2147483648,
+    "memoryTimeSpan": 10,
+    "reportMaxRequestSizeHappyPath": 8092,
+    "reportMaxRequestSizeTest": 8092,
+    "reportIncludeRequestBody": true,
+    "reportIncludeResponseBody": true,
+    "reportMaxHttpResponseSizeHappyPath": 8092,
+    "reportMaxBodySizeHappyPath": 8092,
+    "reportMaxHttpResponseSizeTest": 8092,
+    "reportMaxBodySizeTest": 8092,
+    "reportIssuesOnly": false,
+    "reportMaxIssues": 1000,
+    "reportMaxSize": 20971520,
+    "reportGenerateCurlCommand": true,
+    "normalizeServerUrls": true
+  },
+  "customizations": {
+    "happyPaths": {
+      "retry": 1,
+      "responsePolicy": {
+        "httpStatusExpected": true,
+        "mustBeConformant": true
+      },
+      "httpStatusExpected": []
+    },
+    "tests": {
+      "responsePolicy": {
+        "httpStatusExpected": true,
+        "mustBeConformant": true
+      }
+    }
+  },
+  "environments": {
+    "default": {
+      "variables": {
+        "host": {
+          "name": "SCAN42C_HOST",
+          "from": "environment",
+          "required": false,
+          "default": "https://localhost:3000"
+        },
+        "username": {
+          "name": "SCAN42C_USERNAME",
+          "from": "environment",
+          "required": false,
+          "default": "username"
+        },
+        "password": {
+          "name": "SCAN42C_PASSWORD",
+          "from": "environment",
+          "required": false,
+          "default": "password"
+        }
+      }
+    }
+  },
+  "operations": {
+    "CancelProductOrder": {
+      "operationId": "CancelProductOrder",
+      "request": {
+        "operationId": "CancelProductOrder",
+        "auth": [
+          "bearerAuth"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "CancelProductOrder",
+            "method": "DELETE",
+            "url": "{{host}}/productOrder/{orderId}",
+            "paths": [
+              {
+                "key": "orderId",
+                "value": "{{new_orderId}}"
+              }
+            ]
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "400": {
+            "expectations": {
+              "httpStatus": 400
+            }
+          },
+          "401": {
+            "expectations": {
+              "httpStatus": 401
+            }
+          },
+          "403": {
+            "expectations": {
+              "httpStatus": 403
+            }
+          },
+          "406": {
+            "expectations": {
+              "httpStatus": 406
+            }
+          },
+          "415": {
+            "expectations": {
+              "httpStatus": 415
+            }
+          },
+          "429": {
+            "expectations": {
+              "httpStatus": 429
+            }
+          },
+          "500": {
+            "expectations": {
+              "httpStatus": 500
+            }
+          },
+          "default": {
+            "expectations": {
+              "httpStatus": "default"
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "$ref": "#/operations/CreateProductOrder/request",
+              "responses": {
+                "201": {
+                  "expectations": {
+                    "httpStatus": 201
+                  },
+                  "variableAssignments": {
+                    "new_orderId": {
+                      "in": "body",
+                      "from": "response",
+                      "contentType": "json",
+                      "path": {
+                        "type": "jsonPointer",
+                        "value": "/orderId"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/CancelProductOrder/request",
+              "environment": {
+                "orderId": "{{new_orderId}}"
+              }
+            }
+          ],
+          "fuzzing": true
+        }
+      ],
+      "authorizationTests": [
+        "bola"
+      ]
+    },
+    "CreateProductOrder": {
+      "operationId": "CreateProductOrder",
+      "request": {
+        "operationId": "CreateProductOrder",
+        "auth": [
+          "bearerAuth"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "CreateProductOrder",
+            "method": "POST",
+            "url": "{{host}}/productOrder",
+            "headers": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "requestBody": {
+              "mode": "json",
+              "json": {
+                "customerId": "{{customerId}}",
+                "productId": "SIM001",
+                "quantity": 1
+              }
+            }
+          }
+        },
+        "defaultResponse": "201",
+        "responses": {
+          "201": {
+            "expectations": {
+              "httpStatus": 201
+            }
+          },
+          "400": {
+            "expectations": {
+              "httpStatus": 400
+            }
+          },
+          "401": {
+            "expectations": {
+              "httpStatus": 401
+            }
+          },
+          "403": {
+            "expectations": {
+              "httpStatus": 403
+            }
+          },
+          "406": {
+            "expectations": {
+              "httpStatus": 406
+            }
+          },
+          "415": {
+            "expectations": {
+              "httpStatus": 415
+            }
+          },
+          "429": {
+            "expectations": {
+              "httpStatus": 429
+            }
+          },
+          "500": {
+            "expectations": {
+              "httpStatus": 500
+            }
+          },
+          "default": {
+            "expectations": {
+              "httpStatus": "default"
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/CreateProductOrder/request",
+              "responses": {
+                "201": {
+                  "expectations": {
+                    "httpStatus": 201
+                  },
+                  "variableAssignments": {
+                    "new_orderId": {
+                      "in": "body",
+                      "from": "response",
+                      "contentType": "json",
+                      "path": {
+                        "type": "jsonPointer",
+                        "value": "/orderId"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "$ref": "#/operations/CancelProductOrder/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "DeleteUser": {
+      "operationId": "DeleteUser",
+      "request": {
+        "operationId": "DeleteUser",
+        "auth": [
+          "bearerAuth"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "DeleteUser",
+            "method": "DELETE",
+            "url": "{{host}}/auth/user/{username}",
+            "paths": [
+              {
+                "key": "username",
+                "value": "{{user_to_delete}}"
+              }
+            ]
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "401": {
+            "expectations": {
+              "httpStatus": 401
+            }
+          },
+          "403": {
+            "expectations": {
+              "httpStatus": 403
+            }
+          },
+          "404": {
+            "expectations": {
+              "httpStatus": 404
+            }
+          },
+          "429": {
+            "expectations": {
+              "httpStatus": 429
+            }
+          },
+          "500": {
+            "expectations": {
+              "httpStatus": 500
+            }
+          },
+          "default": {
+            "expectations": {
+              "httpStatus": "default"
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "$ref": "#/operations/UserRegistration/request",
+              "responses": {
+                "201": {
+                  "expectations": {
+                    "httpStatus": 201
+                  },
+                  "variableAssignments": {
+                    "user_to_delete": {
+                      "in": "body",
+                      "from": "response",
+                      "contentType": "json",
+                      "path": {
+                        "type": "jsonPointer",
+                        "value": "/user/username"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/DeleteUser/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "ListProductOrders": {
+      "operationId": "ListProductOrders",
+      "request": {
+        "operationId": "ListProductOrders",
+        "auth": [
+          "bearerAuth"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "ListProductOrders",
+            "method": "GET",
+            "url": "{{host}}/productOrder",
+            "queries": [
+              {
+                "key": "customerId",
+                "value": "{{customerId}}"
+              },
+              {
+                "key": "status",
+                "value": "processing"
+              }
+            ]
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "400": {
+            "expectations": {
+              "httpStatus": 400
+            }
+          },
+          "401": {
+            "expectations": {
+              "httpStatus": 401
+            }
+          },
+          "403": {
+            "expectations": {
+              "httpStatus": 403
+            }
+          },
+          "406": {
+            "expectations": {
+              "httpStatus": 406
+            }
+          },
+          "415": {
+            "expectations": {
+              "httpStatus": 415
+            }
+          },
+          "429": {
+            "expectations": {
+              "httpStatus": 429
+            }
+          },
+          "500": {
+            "expectations": {
+              "httpStatus": 500
+            }
+          },
+          "default": {
+            "expectations": {
+              "httpStatus": "default"
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/ListProductOrders/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "RetrieveProductOrder": {
+      "operationId": "RetrieveProductOrder",
+      "request": {
+        "operationId": "RetrieveProductOrder",
+        "auth": [
+          "bearerAuth"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "RetrieveProductOrder",
+            "method": "GET",
+            "url": "{{host}}/productOrder/{orderId}",
+            "paths": [
+              {
+                "key": "orderId",
+                "value": "{{new_orderId}}"
+              }
+            ]
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "400": {
+            "expectations": {
+              "httpStatus": 400
+            }
+          },
+          "401": {
+            "expectations": {
+              "httpStatus": 401
+            }
+          },
+          "403": {
+            "expectations": {
+              "httpStatus": 403
+            }
+          },
+          "406": {
+            "expectations": {
+              "httpStatus": 406
+            }
+          },
+          "415": {
+            "expectations": {
+              "httpStatus": 415
+            }
+          },
+          "429": {
+            "expectations": {
+              "httpStatus": 429
+            }
+          },
+          "500": {
+            "expectations": {
+              "httpStatus": 500
+            }
+          },
+          "default": {
+            "expectations": {
+              "httpStatus": "default"
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/RetrieveProductOrder/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "UpdateProductOrder": {
+      "operationId": "UpdateProductOrder",
+      "request": {
+        "operationId": "UpdateProductOrder",
+        "auth": [
+          "bearerAuth"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "UpdateProductOrder",
+            "method": "PATCH",
+            "url": "{{host}}/productOrder/{orderId}",
+            "headers": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "paths": [
+              {
+                "key": "orderId",
+                "value": "{{new_orderId}}"
+              }
+            ],
+            "requestBody": {
+              "mode": "json",
+              "json": {
+                "productId": "SIM{{$randomuint}}",
+                "quantity": 10
+              }
+            }
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "400": {
+            "expectations": {
+              "httpStatus": 400
+            }
+          },
+          "401": {
+            "expectations": {
+              "httpStatus": 401
+            }
+          },
+          "403": {
+            "expectations": {
+              "httpStatus": 403
+            }
+          },
+          "406": {
+            "expectations": {
+              "httpStatus": 406
+            }
+          },
+          "415": {
+            "expectations": {
+              "httpStatus": 415
+            }
+          },
+          "429": {
+            "expectations": {
+              "httpStatus": 429
+            }
+          },
+          "500": {
+            "expectations": {
+              "httpStatus": 500
+            }
+          },
+          "default": {
+            "expectations": {
+              "httpStatus": "default"
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/UpdateProductOrder/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ],
+      "authorizationTests": [
+        "bola"
+      ]
+    },
+    "UserLogin": {
+      "operationId": "UserLogin",
+      "request": {
+        "operationId": "UserLogin",
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "UserLogin",
+            "method": "POST",
+            "url": "{{host}}/auth/login",
+            "headers": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "requestBody": {
+              "mode": "json",
+              "json": {
+                "password": "password",
+                "username": "username"
+              }
+            }
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "400": {
+            "expectations": {
+              "httpStatus": 400
+            }
+          },
+          "401": {
+            "expectations": {
+              "httpStatus": 401
+            }
+          },
+          "406": {
+            "expectations": {
+              "httpStatus": 406
+            }
+          },
+          "415": {
+            "expectations": {
+              "httpStatus": 415
+            }
+          },
+          "429": {
+            "expectations": {
+              "httpStatus": 429
+            }
+          },
+          "500": {
+            "expectations": {
+              "httpStatus": 500
+            }
+          },
+          "default": {
+            "expectations": {
+              "httpStatus": "default"
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/UserLogin/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "UserRegistration": {
+      "operationId": "UserRegistration",
+      "request": {
+        "operationId": "UserRegistration",
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "UserRegistration",
+            "method": "POST",
+            "url": "{{host}}/auth/register",
+            "headers": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "requestBody": {
+              "mode": "json",
+              "json": {
+                "address": {
+                  "city": "Springfield",
+                  "country": "US",
+                  "postcode": "62701",
+                  "state": "IL",
+                  "street": "123 Main St."
+                },
+                "email": "user{{$randomuint}}@domain.com",
+                "password": "password",
+                "username": "username{{$randomuint}}"
+              }
+            }
+          }
+        },
+        "defaultResponse": "201",
+        "responses": {
+          "201": {
+            "expectations": {
+              "httpStatus": 201
+            }
+          },
+          "400": {
+            "expectations": {
+              "httpStatus": 400
+            }
+          },
+          "401": {
+            "expectations": {
+              "httpStatus": 401
+            }
+          },
+          "406": {
+            "expectations": {
+              "httpStatus": 406
+            }
+          },
+          "415": {
+            "expectations": {
+              "httpStatus": 415
+            }
+          },
+          "429": {
+            "expectations": {
+              "httpStatus": 429
+            }
+          },
+          "500": {
+            "expectations": {
+              "httpStatus": 500
+            }
+          },
+          "default": {
+            "expectations": {
+              "httpStatus": "default"
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/UserRegistration/request",
+              "responses": {
+                "201": {
+                  "expectations": {
+                    "httpStatus": 201
+                  },
+                  "variableAssignments": {
+                    "user_to_delete": {
+                      "in": "body",
+                      "from": "response",
+                      "contentType": "json",
+                      "path": {
+                        "type": "jsonPointer",
+                        "value": "/user/username"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "$ref": "#/operations/DeleteUser/request",
+              "environment": {
+                "username": "{{user_to_delete}}"
+              }
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    }
+  },
+  "before": [
+    {
+      "$ref": "#/operations/UserLogin/request",
+      "responses": {
+        "200": {
+          "expectations": {
+            "httpStatus": 200
+          },
+          "variableAssignments": {
+            "customerId": {
+              "in": "body",
+              "from": "response",
+              "contentType": "json",
+              "path": {
+                "type": "jsonPointer",
+                "value": "/user/customerId"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "$ref": "#/operations/CreateProductOrder/request",
+      "responses": {
+        "201": {
+          "expectations": {
+            "httpStatus": 201
+          },
+          "variableAssignments": {
+            "new_orderId": {
+              "in": "body",
+              "from": "response",
+              "contentType": "json",
+              "path": {
+                "type": "jsonPointer",
+                "value": "/orderId"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "authenticationDetails": [
+    {
+      "bearerAuth": {
+        "type": "bearer",
+        "default": "user",
+        "credentials": {
+          "user": {
+            "credential": "{{bearerAuth}}",
+            "requests": [
+              {
+                "$ref": "#/operations/UserLogin/request",
+                "responses": {
+                  "200": {
+                    "expectations": {
+                      "httpStatus": 200
+                    },
+                    "variableAssignments": {
+                      "bearerAuth": {
+                        "in": "body",
+                        "from": "response",
+                        "contentType": "json",
+                        "path": {
+                          "type": "jsonPointer",
+                          "value": "/token"
+                        }
+                      },
+                      "customerId": {
+                        "in": "body",
+                        "from": "response",
+                        "contentType": "json",
+                        "path": {
+                          "type": "jsonPointer",
+                          "value": "/user/customerId"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "user2": {
+            "credential": "{{bearerAuth}}",
+            "requests": [
+              {
+                "$ref": "#/operations/UserLogin/request",
+                "environment": {
+                  "username": "username2",
+                  "password": "password"
+                },
+                "responses": {
+                  "200": {
+                    "expectations": {
+                      "httpStatus": 200
+                    },
+                    "variableAssignments": {
+                      "bearerAuth": {
+                        "in": "body",
+                        "from": "response",
+                        "contentType": "json",
+                        "path": {
+                          "type": "jsonPointer",
+                          "value": "/token"
+                        }
+                      },
+                      "customerId": {
+                        "in": "body",
+                        "from": "response",
+                        "contentType": "json",
+                        "path": {
+                          "type": "jsonPointer",
+                          "value": "/user/customerId"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "admin": {
+            "credential": "{{bearerAuth}}",
+            "requests": [
+              {
+                "$ref": "#/operations/UserLogin/request",
+                "environment": {
+                  "username": "admin",
+                  "password": "password"
+                },
+                "responses": {
+                  "200": {
+                    "expectations": {
+                      "httpStatus": 200
+                    },
+                    "variableAssignments": {
+                      "bearerAuth": {
+                        "in": "body",
+                        "from": "response",
+                        "contentType": "json",
+                        "path": {
+                          "type": "jsonPointer",
+                          "value": "/token"
+                        }
+                      },
+                      "customerId": {
+                        "in": "body",
+                        "from": "response",
+                        "contentType": "json",
+                        "path": {
+                          "type": "jsonPointer",
+                          "value": "/user/customerId"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "authorizationTests": {
+    "bola": {
+      "key": "authentication-swapping-bola",
+      "source": [
+        "bearerAuth/user"
+      ],
+      "target": [
+        "bearerAuth/user2"
+      ]
+    }
+  }
+}

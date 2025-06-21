@@ -421,7 +421,7 @@
                     },
                     "additionalProperties": false
                   },
-                  "maxItems": 4
+                  "maxItems": 200
                 }
               }
             }
@@ -808,7 +808,7 @@
       },
       "status": {
         "type": "string",
-        "pattern": "^(processing|completed|canceled)$",
+        "pattern": "^(processing|completed|cancelled)$",
         "example": "completed",
         "minLength": 9,
         "maxLength": 10
