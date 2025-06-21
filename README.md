@@ -29,12 +29,12 @@ If you have feature requests or issues, please [create an issue](https://github.
 
 1. Clone this repository to your local machine.
 2. Ensure Docker Desktop (or compatible container software) is running.
-3. Start the API Server(Run command in repo root directory):
+3. Start the API Server(Run command in the folder **src/** inside the repo root directory):
    ```bash
    npm start
    ```
-4. Update PROTECTION_TOKEN_PROTECTION env. variable in **src/firewall-deployment/.env** with your Protection Token generated in the SaaS platform for the API.
-4. Deploy the Firewall and its dependencies using Docker Compose:
+4. Update PROTECTION_TOKEN_PROTECTION environment variable in **src/firewall-deployment/.env** with your Protection Token generated in the SaaS platform for the API.
+4. Deploy the Firewall using Docker Compose:
    ```bash
    docker-compose -f src/firewall-deployment/protect.yml up
    ```
@@ -47,30 +47,48 @@ If you have feature requests or issues, please [create an issue](https://github.
 
 - **Vulnerable Version**: For demonstrating Audit & SQG (Security Quality Gates) failures.
 - **Secure Version**: For use with Conformance Scan and best-practice checks.
+- **Protection Version**: For demonstrating different protection levels based on the quality of the OpenAPI Specification.
+
+---
 
 ### Seeded User Accounts
 
 - Three test users are included in the MongoDB instance for immediate login and testing.
-```bash
+
 regular test user
+```bash
 username = username
 password = password
 ```
-
-```bash
 regular test user 2
+```bash
 username = username2
 password = password
 ```
-
-```bash
 admin test user
+```bash
 username = admin
 password = password
 ```
+
+---
+
 ### Postman Assets
 
 - A collection is available for testing API endpoints.
+
+---
+
+### Scripts
+
+Two scripts are included under **/scripts/** folder for easy management:
+
+Script #1 (**reset_database.sh**)
+The script resets the database and reinitialize the default users.
+It's useful for use after conformance scans to reset garbage data generated from the scan.
+
+Script #2 (**reset_firewall.sh**)
+The script resets the firewall deployment
 
 ---
 
