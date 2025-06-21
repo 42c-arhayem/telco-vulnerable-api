@@ -62,11 +62,7 @@
                       "maxLength": 100
                     },
                     "token": {
-                      "type": "string",
-                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjdXN0b21lcklkIjoiYzU5ZWEzMTYtNmNhYS00ZDRjLWJkZGEtNzQ4NDk0MjY2NDc3IiwiaXNBZG1pbiI6ZmFsc2UsImlhdCI6MTc0Njg5MDQxNiwiZXhwIjoxNzQ2ODk0MDE2fQ.YKvGiSCB9OawrVFZBJeST5xGbOzPOEOdTHbPk8ATDyQ",
-                      "pattern": "^([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_\\-\\+\\/=]{4,})",
-                      "minLength": 25,
-                      "maxLength": 1000
+                      "$ref": "#/components/schemas/token"
                     },
                     "user": {
                       "type": "object",
@@ -276,6 +272,15 @@
           },
           "500": {
             "$ref": "#/components/responses/ResponseError500"
+          },
+          "401": {
+            "$ref": "#/components/responses/ResponseError401"
+          },
+          "429": {
+            "$ref": "#/components/responses/ResponseError401"
+          },
+          "default": {
+            "$ref": "#/components/responses/DefaultErrorResponse"
           }
         },
         "security": [
@@ -573,8 +578,8 @@
                         "quantity": {
                           "$ref": "#/components/schemas/quantity"
                         },
-                        "priority": {
-                          "$ref": "#/components/schemas/priority"
+                        "productId": {
+                          "$ref": "#/components/schemas/productId"
                         }
                       },
                       "additionalProperties": false
@@ -705,11 +710,7 @@
         "description": "The unique username of the user to delete.",
         "required": true,
         "schema": {
-          "type": "string",
-          "example": "user",
-          "pattern": "^[\\sa-zA-Z0-9]{5,35}$",
-          "minLength": 5,
-          "maxLength": 35
+          "$ref": "#/components/schemas/username"
         }
       }
     },
@@ -717,7 +718,7 @@
       "username": {
         "type": "string",
         "pattern": "^[\\sa-zA-Z0-9]{5,35}$",
-        "example": "user",
+        "example": "username",
         "minLength": 5,
         "maxLength": 35
       },
@@ -796,13 +797,6 @@
         "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$",
         "x-42c-format": "o:uuid"
       },
-      "priority": {
-        "type": "string",
-        "pattern": "^(Low|Medium|High)$",
-        "example": "High",
-        "minLength": 3,
-        "maxLength": 6
-      },
       "quantity": {
         "type": "integer",
         "format": "int32",
@@ -845,13 +839,26 @@
         "x-42c-format": "o:date-time"
       },
       "MessageObject": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "$ref": "#/components/schemas/ResponseMessage"
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "message": {
+                "$ref": "#/components/schemas/ResponseMessage"
+              }
+            },
+            "required": ["message"]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "$ref": "#/components/schemas/ResponseMessage"
+              }
+            },
+            "required": ["error"]
           }
-        },
-        "additionalProperties": false
+        ]
       },
       "ResponseMessage": {
         "type": "string",
