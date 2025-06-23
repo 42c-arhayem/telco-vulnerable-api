@@ -228,7 +228,7 @@
         ],
         "responses": {
           "200": {
-            "description": "User deleted successfully.",
+            "description": "User deleted successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -236,8 +236,8 @@
                   "properties": {
                     "message": {
                       "type": "string",
-                      "example": "User deleted successfully.",
-                      "pattern": "^User deleted successfully.$",
+                      "example": "User deleted successfully",
+                      "pattern": "^User deleted successfully$",
                       "minLength": 0,
                       "maxLength": 100
                     }
@@ -324,7 +324,7 @@
         },
         "responses": {
           "201": {
-            "description": "Product order created successfully.",
+            "description": "Product order created successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -335,8 +335,8 @@
                     },
                     "message": {
                       "type": "string",
-                      "example": "Order created successfully.",
-                      "pattern": "^Order created successfully.$",
+                      "example": "Order created successfully",
+                      "pattern": "^Order created successfully$",
                       "minLength": 0,
                       "maxLength": 100
                     }
@@ -556,7 +556,7 @@
         },
         "responses": {
           "200": {
-            "description": "Product order updated successfully.",
+            "description": "Product order updated successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -564,8 +564,8 @@
                   "properties": {
                     "message": {
                       "type": "string",
-                      "example": "Order updated successfully.",
-                      "pattern": "^Order updated successfully.$",
+                      "example": "Order updated successfully",
+                      "pattern": "^Order updated successfully$",
                       "minLength": 0,
                       "maxLength": 100
                     },
@@ -632,7 +632,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Product order canceled successfully.",
+            "description": "Product order canceled successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -640,8 +640,8 @@
                   "properties": {
                     "message": {
                       "type": "string",
-                      "example": "Order canceled successfully.",
-                      "pattern": "^Order canceled successfully.$",
+                      "example": "Order canceled successfully",
+                      "pattern": "^Order canceled successfully$",
                       "minLength": 0,
                       "maxLength": 100
                     }
