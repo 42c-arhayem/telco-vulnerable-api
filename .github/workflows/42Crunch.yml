@@ -15,7 +15,9 @@ jobs:
         env:
             platformUrl: 'https://demolabs.42crunch.cloud'
             X42C_API_TOKEN: ${{ secrets.API_KEY }}
-            
+            config_name: 'base_config'
+            platformService: 'services.demolabs.42crunch.cloud:8001'
+            API_URL: 'https://cute-noble-boar.ngrok-free.app'
         steps:
           #checkout the code
           - name: Checkout code
@@ -58,6 +60,7 @@ jobs:
               # sarif-report: # optional, default is 
               # Set the maximum timeout (in seconds) for the audit report. Fail if the result isn't ready within that interval.
               # audit-timeout: # optional
+          
           - name: Check Audit Summary Report
             id: Check_Audit
             run: |
@@ -65,16 +68,53 @@ jobs:
               echo ${{ github.workspace }}/audit-action-report-${{ github.run_id }}.json
               cat ${{ github.workspace }}/audit-action-report-${{ github.run_id }}.json
               apiId=$(jq -r '.audit.report["oas_files/telco-openapi-protection.json"].apiId' ${{ github.workspace }}/audit-action-report-${{ github.run_id }}.json)
-              echo "API UUID: $apiId"
-              echo "API_UUID=$apiId" >> $GITHUB_OUTPUT
+              echo "API Protection UUID: $apiId"
+              echo "API_protection_UUID=$apiId" >> $GITHUB_OUTPUT
+
+          # Fetch Telco API AliasId from the .42c/conf.yaml
+          - name: Fetch API AliasId
+            id: Fetch_API_AliasId
+            run: |
+              echo "Audit JSON Report:"
+              cat ${{ github.workspace }}/.42c/conf.yaml
+              aliasId=$(yq '.apis.["oas_files/telco-openapi-remediated.json"].alias' < ${{ github.workspace }}/.42c/conf.yaml)
+              echo "Telco API AliasId: $aliasId"
+              echo "::set-output name=API_ALIAS_ID::$aliasId"
+
+          # Upload Scan V2 Configuration
+          - name: Upload Scan Configuration and Fetch Token
+            id: upload_scan_config
+            run: |
+              python3 ${{ github.workspace }}/scripts/conformance_scanv2.py \
+                -c ${{ secrets.API_KEY }} \
+                -p ${{ env.platformUrl }} \
+                -a ${{ steps.Check_Audit.outputs.API_UUID }} \
+                -n ${{ env.config_name }} \
+                -t scan_token.json \
+                -f ${{ github.workspace }}/.42c/scan/${{ steps.Fetch_API_AliasId.outputs.API_ALIAS_ID }}/scanconf.json --action upload_conf
+              scan_token=$(cat ${{ github.workspace }}/scan_token.json | jq -r '.scan_token')
+              echo "SCAN_TOKEN=$scan_token" >> $GITHUB_ENV  # Save to GITHUB_ENV to pass between steps
+              echo "Scan token is $scan_token"
+              cat ${{ github.workspace }}/scan_token.json
+
+          # Pull and Run 42Crunch Docker Image
+          - name: Pull and Run 42Crunch Docker Image
+            run: |
+              echo "Scan token is $SCAN_TOKEN"
+              docker pull 42crunch/scand-agent:v2
+              docker run -e SCAN_TOKEN=$SCAN_TOKEN \
+                -e SCAN42C_HOST=${{ env.API_URL }} \
+                -e PLATFORM_SERVICE=${{ env.platformService }} \
+                42crunch/scand-agent:v2
+              echo "Scan report: ${{ env.platformUrl }}/apis/${{ steps.Check_Audit.outputs.API_UUID }}/scan"
 
           - name: Reconfigure Protection
             id: Reconfigure_Protection
             run: |
               echo "Reconfiguring Protection"
-              echo "API UUID: ${{ steps.Check_Audit.outputs.API_UUID }}"
-              API_UUID=${{ steps.Check_Audit.outputs.API_UUID }}
+              echo "API UUID: ${{ steps.Check_Audit.outputs.API_protection_UUID }}"
+              API_UUID=${{ steps.Check_Audit.outputs.API_protection_UUID }}
               PLATFORM_URL=${{ env.platformUrl }}
-              curl --request POST "$PLATFORM_URL/api/v1/apis/$API_UUID/protection" \
+              curl --request POST "$PLATFORM_URL/api/v1/apis/$API_protection_UUID/protection" \
                 --header "Content-Type: application/json" \
                 --header "X-API-KEY: ${{ env.X42C_API_TOKEN }}"
