@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "Telco Vulnerable API",
+    "title": "Telco Vulnerable API Remediated for Protection",
     "version": "1.0.0",
     "description": "An intentionally vulnerable API inspired by TMF 622, designed to eventually showcase API security issues like BOLA,BOPLA, BFLA, and other OWASP API Top 10 vulnerabilities."
   },
@@ -146,7 +146,8 @@
                   "username",
                   "password",
                   "email"
-                ]
+                ],
+                "additionalProperties": false
               }
             }
           }
@@ -373,6 +374,7 @@
         },
         "security": [
           {
+            "bearerAuth": []
           }
         ]
       },
@@ -418,7 +420,8 @@
                       }
                     },
                     "additionalProperties": false
-                  }
+                  },
+                  "maxItems": 200
                 }
               }
             }
@@ -790,7 +793,11 @@
       "customerId": {
         "type": "string",
         "format": "uuid",
-        "example": "123e4567-e89b-12d3-a456-426614174000"
+        "example": "a83a29f5-0d63-46f2-8f2e-44c2f1d2e07e",
+        "minLength": 36,
+        "maxLength": 36,
+        "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$",
+        "x-42c-format": "o:uuid"
       },
       "quantity": {
         "type": "integer",
@@ -801,7 +808,7 @@
       },
       "status": {
         "type": "string",
-        "pattern": "^(processing|completed|canceled)$",
+        "pattern": "^(processing|completed|cancelled)$",
         "example": "completed",
         "minLength": 9,
         "maxLength": 10
