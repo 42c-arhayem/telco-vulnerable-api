@@ -68,6 +68,9 @@ jobs:
               echo ${{ github.workspace }}/audit-action-report-${{ github.run_id }}.json
               cat ${{ github.workspace }}/audit-action-report-${{ github.run_id }}.json
               apiId=$(jq -r '.audit.report["oas_files/telco-openapi-protection.json"].apiId' ${{ github.workspace }}/audit-action-report-${{ github.run_id }}.json)
+              apiId2=$(jq -r '.audit.report["oas_files/telco-openapi-remediated.json"].apiId' ${{ github.workspace }}/audit-action-report-${{ github.run_id }}.json)
+              echo "API Scan UUID: $apiId2"
+              echo "API_scan_UUID=$apiId2" >> $GITHUB_OUTPUT
               echo "API Protection UUID: $apiId"
               echo "API_protection_UUID=$apiId" >> $GITHUB_OUTPUT
 
@@ -88,7 +91,7 @@ jobs:
               python3 ${{ github.workspace }}/scripts/conformance_scanv2.py \
                 -c ${{ secrets.API_KEY }} \
                 -p ${{ env.platformUrl }} \
-                -a ${{ steps.Check_Audit.outputs.API_UUID }} \
+                -a ${{ steps.Check_Audit.outputs.API_scan_UUID }} \
                 -n ${{ env.config_name }} \
                 -t scan_token.json \
                 -f ${{ github.workspace }}/.42c/scan/${{ steps.Fetch_API_AliasId.outputs.API_ALIAS_ID }}/scanconf.json --action upload_conf
