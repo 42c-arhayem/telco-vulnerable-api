@@ -43,7 +43,7 @@ jobs:
               # Upload results to Github Code Scanning
               # upload-to-code-scanning: # optional, default is false
               # If set to 'true', disables all local failure conditions (like minimum score) and fails execution only if the criteria defined in SQGs are not met.
-              ignore-failures: true # optional, default is false
+              ignore-failures: false # optional, default is false
               # Set the root directory for the plugin
               # root-directory: # optional
               # Change the default collection name
@@ -109,7 +109,7 @@ jobs:
                 -e SCAN42C_HOST=${{ env.API_URL }} \
                 -e PLATFORM_SERVICE=${{ env.platformService }} \
                 42crunch/scand-agent:v2
-              echo "Scan report: ${{ env.platformUrl }}/apis/${{ steps.Check_Audit.outputs.API_UUID }}/scan"
+              echo "Scan report: ${{ env.platformUrl }}/apis/${{ steps.Check_Audit.outputs.API_scan_UUID }}/scan"
 
           - name: Reconfigure Protection
             id: Reconfigure_Protection
