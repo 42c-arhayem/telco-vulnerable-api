@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "Insecure Telco Vulnerable API",
+    "title": "Telco Vulnerable API",
     "version": "1.0.0",
     "description": "An intentionally vulnerable API inspired by TMF 622, designed to eventually showcase API security issues like BOLA,BOPLA, BFLA, and other OWASP API Top 10 vulnerabilities."
   },
@@ -11,6 +11,12 @@
       "description": "Local development server"
     }
   ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "x-42c-accept-empty-security": true,
   "paths": {
     "/auth/login": {
       "post": {
@@ -31,6 +37,7 @@
                     "$ref": "#/components/schemas/password"
                   }
                 },
+                "additionalProperties": false,
                 "required": [
                   "username",
                   "password"
@@ -48,10 +55,14 @@
                   "type": "object",
                   "properties": {
                     "message": {
-                      "type": "string"
+                      "type": "string",
+                      "example": "Login successful",
+                      "pattern": "^Login successful$",
+                      "minLength": 0,
+                      "maxLength": 100
                     },
                     "token": {
-                      "type": "string"
+                      "$ref": "#/components/schemas/token"
                     },
                     "user": {
                       "type": "object",
@@ -66,14 +77,17 @@
                           "$ref": "#/components/schemas/email"
                         },
                         "isAdmin": {
-                          "type": "boolean"
+                          "type": "boolean",
+                          "example": false
                         },
                         "customerId": {
                           "$ref": "#/components/schemas/customerId"
                         }
-                      }
+                      },
+                      "additionalProperties": false
                     }
-                  }
+                  },
+                  "additionalProperties": false
                 }
               }
             }
@@ -99,7 +113,8 @@
           "default": {
             "$ref": "#/components/responses/DefaultErrorResponse"
           }
-        }
+        },
+        "security": []
       }
     },
     "/auth/register": {
@@ -167,9 +182,11 @@
                         "customerId": {
                           "$ref": "#/components/schemas/customerId"
                         }
-                      }
+                      },
+                      "additionalProperties": false
                     }
-                  }
+                  },
+                  "additionalProperties": false
                 }
               }
             }
@@ -195,7 +212,8 @@
           "default": {
             "$ref": "#/components/responses/DefaultErrorResponse"
           }
-        }
+        },
+        "security": []
       }
     },
     "/auth/user/{username}": {
@@ -210,34 +228,24 @@
         ],
         "responses": {
           "200": {
-            "description": "User deleted successfully.",
+            "description": "User deleted successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
                     "message": {
-                      "type": "string"
+                      "type": "string",
+                      "example": "User deleted successfully",
+                      "pattern": "^User deleted successfully$",
+                      "minLength": 0,
+                      "maxLength": 100
                     }
-                  }
+                  },
+                  "additionalProperties": false
                 }
               }
             }
-          },
-          "401": {
-            "$ref": "#/components/responses/ResponseError401"
-          },
-          "400": {
-            "$ref": "#/components/responses/ResponseError400"
-          },
-          "406": {
-            "$ref": "#/components/responses/ResponseError406"
-          },
-          "415": {
-            "$ref": "#/components/responses/ResponseError415"
-          },
-          "429": {
-            "$ref": "#/components/responses/ResponseError429"
           },
           "403": {
             "$ref": "#/components/responses/ResponseError403"
@@ -250,17 +258,36 @@
                   "type": "object",
                   "properties": {
                     "message": {
-                      "type": "string"
+                      "type": "string",
+                      "example": "User not found.",
+                      "pattern": "^User not found.$",
+                      "minLength": 0,
+                      "maxLength": 100
                     }
-                  }
+                  },
+                  "additionalProperties": false
                 }
               }
             }
           },
           "500": {
             "$ref": "#/components/responses/ResponseError500"
+          },
+          "401": {
+            "$ref": "#/components/responses/ResponseError401"
+          },
+          "429": {
+            "$ref": "#/components/responses/ResponseError401"
+          },
+          "default": {
+            "$ref": "#/components/responses/DefaultErrorResponse"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/productOrder": {
@@ -289,14 +316,15 @@
                   "productId",
                   "quantity",
                   "customerId"
-                ]
+                ],
+                "additionalProperties": false
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "Product order created successfully.",
+            "description": "Product order created successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -307,12 +335,13 @@
                     },
                     "message": {
                       "type": "string",
-                      "example": "Order created successfully.",
-                      "pattern": "^Order created successfully.$",
+                      "example": "Order created successfully",
+                      "pattern": "^Order created successfully$",
                       "minLength": 0,
                       "maxLength": 100
                     }
-                  }
+                  },
+                  "additionalProperties": false
                 }
               }
             }
@@ -341,7 +370,11 @@
           "default": {
             "$ref": "#/components/responses/DefaultErrorResponse"
           }
-        }
+        },
+        "security": [
+          {
+          }
+        ]
       },
       "get": {
         "summary": "List Product Orders",
@@ -383,7 +416,8 @@
                       "status": {
                         "$ref": "#/components/schemas/status"
                       }
-                    }
+                    },
+                    "additionalProperties": false
                   }
                 }
               }
@@ -413,7 +447,12 @@
           "default": {
             "$ref": "#/components/responses/DefaultErrorResponse"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/productOrder/{orderId}": {
@@ -449,7 +488,8 @@
                     "orderDate": {
                       "$ref": "#/components/schemas/orderDate"
                     }
-                  }
+                  },
+                  "additionalProperties": false
                 }
               }
             }
@@ -478,7 +518,12 @@
           "default": {
             "$ref": "#/components/responses/DefaultErrorResponse"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       },
       "patch": {
         "summary": "Update Product Order",
@@ -502,21 +547,26 @@
                   "productId": {
                     "$ref": "#/components/schemas/productId"
                   }
-                }
+                },
+                "additionalProperties": false
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Product order updated successfully.",
+            "description": "Product order updated successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
                     "message": {
-                      "type": "string"
+                      "type": "string",
+                      "example": "Order updated successfully",
+                      "pattern": "^Order updated successfully$",
+                      "minLength": 0,
+                      "maxLength": 100
                     },
                     "order": {
                       "type": "object",
@@ -527,12 +577,14 @@
                         "quantity": {
                           "$ref": "#/components/schemas/quantity"
                         },
-                        "priority": {
-                          "$ref": "#/components/schemas/priority"
+                        "productId": {
+                          "$ref": "#/components/schemas/productId"
                         }
-                      }
+                      },
+                      "additionalProperties": false
                     }
-                  }
+                  },
+                  "additionalProperties": false
                 }
               }
             }
@@ -561,7 +613,12 @@
           "default": {
             "$ref": "#/components/responses/DefaultErrorResponse"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       },
       "delete": {
         "summary": "Cancel Product Order",
@@ -574,16 +631,21 @@
         ],
         "responses": {
           "200": {
-            "description": "Product order canceled successfully.",
+            "description": "Product order canceled successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
                     "message": {
-                      "type": "string"
+                      "type": "string",
+                      "example": "Order canceled successfully",
+                      "pattern": "^Order canceled successfully$",
+                      "minLength": 0,
+                      "maxLength": 100
                     }
-                  }
+                  },
+                  "additionalProperties": false
                 }
               }
             }
@@ -612,7 +674,12 @@
           "default": {
             "$ref": "#/components/responses/DefaultErrorResponse"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     }
   },
@@ -642,74 +709,155 @@
         "description": "The unique username of the user to delete.",
         "required": true,
         "schema": {
-          "type": "string"
+          "$ref": "#/components/schemas/username"
         }
       }
     },
     "schemas": {
       "username": {
-        "type": "string"
+        "type": "string",
+        "pattern": "^[\\sa-zA-Z0-9]{5,35}$",
+        "example": "username",
+        "minLength": 5,
+        "maxLength": 35
       },
       "password": {
-        "type": "string"
+        "type": "string",
+        "pattern": "^[a-zA-Z0-9&@#!?]{8,64}$",
+        "example": "password",
+        "format": "o:common:password",
+        "minLength": 8,
+        "maxLength": 64,
+        "x-42c-format": "o:common:password"
       },
       "email": {
-        "type": "string"
+        "type": "string",
+        "pattern": "^[\\w\\-+.]+@((\\w\\-?)+\\.){1,4}[a-zA-Z0-9]{2,63}$",
+        "example": "user@domain.com",
+        "format": "email",
+        "minLength": 5,
+        "maxLength": 68,
+        "x-42c-format": "o:email"
       },
       "address": {
         "type": "object",
         "properties": {
           "street": {
-            "type": "string"
+            "type": "string",
+            "example": "123 Main St.",
+            "pattern": "^[a-zA-Z0-9.\\s]{5,100}$",
+            "minLength": 0,
+            "maxLength": 100
           },
           "city": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^[a-zA-Z\\s]{3,50}$",
+            "example": "Springfield",
+            "minLength": 3,
+            "maxLength": 50
           },
           "state": {
-            "type": "string"
+            "type": "string",
+            "example": "IL",
+            "pattern": "^[a-zA-Z]{2,50}$",
+            "minLength": 2,
+            "maxLength": 2
           },
           "postcode": {
-            "type": "string"
+            "type": "string",
+            "example": "62701",
+            "pattern": "^[a-zA-Z0-9\\s]{5,12}$",
+            "minLength": 5,
+            "maxLength": 12
           },
           "country": {
-            "type": "string"
+            "type": "string",
+            "example": "US",
+            "pattern": "^[a-zA-Z]{2,50}$",
+            "minLength": 2,
+            "maxLength": 2
           }
-        }
+        },
+        "additionalProperties": false
       },
       "productId": {
-        "type": "string"
+        "type": "string",
+        "pattern": "^[a-zA-Z0-9]{5,10}$",
+        "example": "SIM001",
+        "minLength": 5,
+        "maxLength": 10
       },
       "customerId": {
-        "type": "string"
-      },
-      "priority": {
-        "type": "string"
+        "type": "string",
+        "format": "uuid",
+        "example": "123e4567-e89b-12d3-a456-426614174000"
       },
       "quantity": {
-        "type": "integer"
+        "type": "integer",
+        "format": "int32",
+        "example": 1,
+        "minimum": 0,
+        "maximum": 100
       },
       "status": {
-        "type": "string"
+        "type": "string",
+        "pattern": "^(processing|completed|canceled)$",
+        "example": "completed",
+        "minLength": 9,
+        "maxLength": 10
       },
       "orderId": {
-        "type": "string"
+        "type": "string",
+        "format": "uuid",
+        "example": "123e4567-e89b-12d3-a456-426614174000",
+        "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$",
+        "minLength": 36,
+        "maxLength": 36,
+        "x-42c-format": "o:uuid"
       },
       "token": {
-        "type": "string"
+        "type": "string",
+        "pattern": "^([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_\\-\\+\\/=]{4,})",
+        "minLength": 25,
+        "maxLength": 1000,
+        "format": "o:common:JWT",
+        "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+        "x-42c-format": "o:common:JWT"
       },
       "orderDate": {
-        "type": "string"
+        "type": "string",
+        "format": "date-time",
+        "example": "2021-08-30T23:01:14.274085491+15:55",
+        "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])T(?:[01][0-9]|2[0-3]):[0-5][0-9]:(?:[0-5][0-9]|60)(?:\\.[0-9]{1,15})?(?:Z|[+\\-](?:[01][0-9]|2[0-3]):[0-5][0-9])$",
+        "minLength": 20,
+        "maxLength": 38,
+        "x-42c-format": "o:date-time"
       },
       "MessageObject": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "$ref": "#/components/schemas/ResponseMessage"
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "message": {
+                "$ref": "#/components/schemas/ResponseMessage"
+              }
+            },
+            "required": ["message"]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "$ref": "#/components/schemas/ResponseMessage"
+              }
+            },
+            "required": ["error"]
           }
-        }
+        ]
       },
       "ResponseMessage": {
-        "type": "string"
+        "type": "string",
+        "pattern": "^[A-Za-z0-9\/\\.\"', :_]{1,100}$"
       }
     },
     "responses": {
@@ -802,6 +950,13 @@
             }
           }
         }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
       }
     }
   }
