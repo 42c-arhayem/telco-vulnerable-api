@@ -372,9 +372,7 @@
           }
         },
         "security": [
-          {
-            "bearerAuth": []
-          }
+          {}
         ]
       },
       "get": {
