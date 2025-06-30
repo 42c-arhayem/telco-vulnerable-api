@@ -57,7 +57,7 @@ router.post("/", authenticate, async (req, res) => {
     await newOrder.save();
     res.status(201).json({
       orderId: newOrder.orderId,
-      message: "Order created successfully.",
+      message: "Order created successfully",
     });
   } catch (error) {
     console.error("Error creating order:", error);
@@ -81,7 +81,7 @@ router.patch("/:orderId", authenticate, async (req, res) => {
     }
 
     res.status(200).json({
-      message: "Order updated successfully.",
+      message: "Order updated successfully",
       order: updatedOrder,
     });
   } catch (error) {
@@ -99,7 +99,7 @@ router.delete("/:orderId", authenticate, async (req, res) => {
       return res.status(404).json({ error: "Order not found" });
     }
 
-    res.status(200).json({ message: "Order canceled successfully." });
+    res.status(200).json({ message: "Order canceled successfully" });
   } catch (error) {
     console.error("Error canceling order:", error); // Log the error
     res.status(500).json({ error: "Error canceling order" });

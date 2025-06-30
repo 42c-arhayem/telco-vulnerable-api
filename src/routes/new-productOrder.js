@@ -58,7 +58,7 @@ router.post("/orders", authenticate, async (req, res) => {
     await newOrder.save();
     res.status(201).json({
       orderId: newOrder.orderId,
-      message: "Order created successfully.",
+      message: "Order created successfully",
     });
   } catch (error) {
     console.error("Error creating order:", error);
@@ -82,7 +82,7 @@ router.patch("/orders/:orderId", authenticate, async (req, res) => {
     }
 
     res.status(200).json({
-      message: "Order updated successfully.",
+      message: "Order updated successfully",
       order: updatedOrder,
     });
   } catch (error) {
@@ -100,7 +100,7 @@ router.delete("/orders/:orderId", authenticate, async (req, res) => {
       return res.status(404).json({ error: "Order not found" });
     }
 
-    res.status(200).json({ message: "Order canceled successfully." });
+    res.status(200).json({ message: "Order canceled successfully" });
   } catch (error) {
     console.error("Error canceling order:", error); // Log the error
     res.status(500).json({ error: "Error canceling order" });
@@ -183,7 +183,7 @@ router.post("/", authenticate, async (req, res) => {
     await newProductOrder.save();
     res.status(201).json({
       orderId: newProductOrder.orderId,
-      message: "Product order created successfully.",
+      message: "Product order created successfully",
     });
   } catch (error) {
     console.error("Error creating product order:", error);
@@ -205,7 +205,7 @@ router.patch("/:orderId", authenticate, async (req, res) => {
     }
 
     res.status(200).json({
-      message: "Product order updated successfully.",
+      message: "Product order updated successfully",
       productOrder: updatedProductOrder,
     });
   } catch (error) {
@@ -223,7 +223,7 @@ router.delete("/:orderId", authenticate, async (req, res) => {
       return res.status(404).json({ error: "Product order not found" });
     }
 
-    res.status(200).json({ message: "Product order canceled successfully." });
+    res.status(200).json({ message: "Product order canceled successfully" });
   } catch (error) {
     console.error("Error canceling product order:", error);
     res.status(500).json({ error: "Error canceling product order" });
