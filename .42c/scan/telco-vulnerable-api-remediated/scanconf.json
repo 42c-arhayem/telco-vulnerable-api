@@ -389,6 +389,9 @@
           ],
           "fuzzing": true
         }
+      ],
+      "authorizationTests": [
+        "bfla"
       ]
     },
     "ListProductOrders": {
@@ -1037,10 +1040,10 @@
     "bfla": {
       "key": "authentication-swapping-bfla",
       "source": [
-        "bearerAuth/admin"
+        "bearerAuth/user"
       ],
       "target": [
-        "bearerAuth/user"
+        "bearerAuth/admin"
       ]
     }
   }
