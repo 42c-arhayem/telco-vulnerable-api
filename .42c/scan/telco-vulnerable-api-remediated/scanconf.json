@@ -2,7 +2,7 @@
   "version": "2.0.0",
   "runtimeConfiguration": {
     "environment": "default",
-    "laxTestingModeEnabled": false,
+    "laxTestingModeEnabled": true,
     "apiConnectivityCheck": true,
     "logLevel": "error",
     "logDestination": "stdout+platform",
