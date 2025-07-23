@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "Telco Vulnerable API Remediated for Protection",
+    "title": "Low Security Telco Vulnerable API",
     "version": "1.0.0",
     "description": "An intentionally vulnerable API inspired by TMF 622, designed to eventually showcase API security issues like BOLA,BOPLA, BFLA, and other OWASP API Top 10 vulnerabilities."
   },
@@ -37,7 +37,6 @@
                     "$ref": "#/components/schemas/password"
                   }
                 },
-                "additionalProperties": false,
                 "required": [
                   "username",
                   "password"
@@ -55,14 +54,10 @@
                   "type": "object",
                   "properties": {
                     "message": {
-                      "type": "string",
-                      "example": "Login successful",
-                      "pattern": "^Login successful$",
-                      "minLength": 0,
-                      "maxLength": 100
+                      "type": "string"
                     },
                     "token": {
-                      "$ref": "#/components/schemas/token"
+                      "type": "string"
                     },
                     "user": {
                       "type": "object",
@@ -70,17 +65,21 @@
                         "username": {
                           "$ref": "#/components/schemas/username"
                         },
+                        "password": {
+                          "$ref": "#/components/schemas/password"
+                        },
                         "email": {
                           "$ref": "#/components/schemas/email"
+                        },
+                        "isAdmin": {
+                          "type": "boolean"
                         },
                         "customerId": {
                           "$ref": "#/components/schemas/customerId"
                         }
-                      },
-                      "additionalProperties": false
+                      }
                     }
-                  },
-                  "additionalProperties": false
+                  }
                 }
               }
             }
@@ -139,8 +138,7 @@
                   "username",
                   "password",
                   "email"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
@@ -176,11 +174,9 @@
                         "customerId": {
                           "$ref": "#/components/schemas/customerId"
                         }
-                      },
-                      "additionalProperties": false
+                      }
                     }
-                  },
-                  "additionalProperties": false
+                  }
                 }
               }
             }
@@ -222,24 +218,34 @@
         ],
         "responses": {
           "200": {
-            "description": "User deleted successfully",
+            "description": "User deleted successfully.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
                     "message": {
-                      "type": "string",
-                      "example": "User deleted successfully",
-                      "pattern": "^User deleted successfully$",
-                      "minLength": 0,
-                      "maxLength": 100
+                      "type": "string"
                     }
-                  },
-                  "additionalProperties": false
+                  }
                 }
               }
             }
+          },
+          "401": {
+            "$ref": "#/components/responses/ResponseError401"
+          },
+          "400": {
+            "$ref": "#/components/responses/ResponseError400"
+          },
+          "406": {
+            "$ref": "#/components/responses/ResponseError406"
+          },
+          "415": {
+            "$ref": "#/components/responses/ResponseError415"
+          },
+          "429": {
+            "$ref": "#/components/responses/ResponseError429"
           },
           "403": {
             "$ref": "#/components/responses/ResponseError403"
@@ -252,29 +258,15 @@
                   "type": "object",
                   "properties": {
                     "message": {
-                      "type": "string",
-                      "example": "User not found.",
-                      "pattern": "^User not found.$",
-                      "minLength": 0,
-                      "maxLength": 100
+                      "type": "string"
                     }
-                  },
-                  "additionalProperties": false
+                  }
                 }
               }
             }
           },
           "500": {
             "$ref": "#/components/responses/ResponseError500"
-          },
-          "401": {
-            "$ref": "#/components/responses/ResponseError401"
-          },
-          "429": {
-            "$ref": "#/components/responses/ResponseError401"
-          },
-          "default": {
-            "$ref": "#/components/responses/DefaultErrorResponse"
           }
         },
         "security": [
@@ -310,15 +302,14 @@
                   "productId",
                   "quantity",
                   "customerId"
-                ],
-                "additionalProperties": false
+                ]
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "Product order created successfully",
+            "description": "Product order created successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -329,13 +320,12 @@
                     },
                     "message": {
                       "type": "string",
-                      "example": "Order created successfully",
-                      "pattern": "^Order created successfully$",
+                      "example": "Order created successfully.",
+                      "pattern": "^Order created successfully.$",
                       "minLength": 0,
                       "maxLength": 100
                     }
-                  },
-                  "additionalProperties": false
+                  }
                 }
               }
             }
@@ -411,10 +401,8 @@
                       "status": {
                         "$ref": "#/components/schemas/status"
                       }
-                    },
-                    "additionalProperties": false
-                  },
-                  "maxItems": 200
+                    }
+                  }
                 }
               }
             }
@@ -484,8 +472,7 @@
                     "orderDate": {
                       "$ref": "#/components/schemas/orderDate"
                     }
-                  },
-                  "additionalProperties": false
+                  }
                 }
               }
             }
@@ -543,26 +530,21 @@
                   "productId": {
                     "$ref": "#/components/schemas/productId"
                   }
-                },
-                "additionalProperties": false
+                }
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Product order updated successfully",
+            "description": "Product order updated successfully.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
                     "message": {
-                      "type": "string",
-                      "example": "Order updated successfully",
-                      "pattern": "^Order updated successfully$",
-                      "minLength": 0,
-                      "maxLength": 100
+                      "type": "string"
                     },
                     "order": {
                       "type": "object",
@@ -573,14 +555,12 @@
                         "quantity": {
                           "$ref": "#/components/schemas/quantity"
                         },
-                        "productId": {
-                          "$ref": "#/components/schemas/productId"
+                        "priority": {
+                          "$ref": "#/components/schemas/priority"
                         }
-                      },
-                      "additionalProperties": false
+                      }
                     }
-                  },
-                  "additionalProperties": false
+                  }
                 }
               }
             }
@@ -627,21 +607,16 @@
         ],
         "responses": {
           "200": {
-            "description": "Product order canceled successfully",
+            "description": "Product order canceled successfully.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
                     "message": {
-                      "type": "string",
-                      "example": "Order canceled successfully",
-                      "pattern": "^Order canceled successfully$",
-                      "minLength": 0,
-                      "maxLength": 100
+                      "type": "string"
                     }
-                  },
-                  "additionalProperties": false
+                  }
                 }
               }
             }
@@ -705,159 +680,74 @@
         "description": "The unique username of the user to delete.",
         "required": true,
         "schema": {
-          "$ref": "#/components/schemas/username"
+          "type": "string"
         }
       }
     },
     "schemas": {
       "username": {
-        "type": "string",
-        "pattern": "^[\\sa-zA-Z0-9]{5,35}$",
-        "example": "username",
-        "minLength": 5,
-        "maxLength": 35
+        "type": "string"
       },
       "password": {
-        "type": "string",
-        "pattern": "^[a-zA-Z0-9&@#!?]{8,64}$",
-        "example": "password",
-        "format": "o:common:password",
-        "minLength": 8,
-        "maxLength": 64,
-        "x-42c-format": "o:common:password"
+        "type": "string"
       },
       "email": {
-        "type": "string",
-        "pattern": "^[\\w\\-+.]+@((\\w\\-?)+\\.){1,4}[a-zA-Z0-9]{2,63}$",
-        "example": "user@domain.com",
-        "format": "email",
-        "minLength": 5,
-        "maxLength": 68,
-        "x-42c-format": "o:email"
+        "type": "string"
       },
       "address": {
         "type": "object",
         "properties": {
           "street": {
-            "type": "string",
-            "example": "123 Main St.",
-            "pattern": "^[a-zA-Z0-9.\\s]{5,100}$",
-            "minLength": 0,
-            "maxLength": 100
+            "type": "string"
           },
           "city": {
-            "type": "string",
-            "pattern": "^[a-zA-Z\\s]{3,50}$",
-            "example": "Springfield",
-            "minLength": 3,
-            "maxLength": 50
+            "type": "string"
           },
           "state": {
-            "type": "string",
-            "example": "IL",
-            "pattern": "^[a-zA-Z]{2,50}$",
-            "minLength": 2,
-            "maxLength": 2
+            "type": "string"
           },
           "postcode": {
-            "type": "string",
-            "example": "62701",
-            "pattern": "^[a-zA-Z0-9\\s]{5,12}$",
-            "minLength": 5,
-            "maxLength": 12
+            "type": "string"
           },
           "country": {
-            "type": "string",
-            "example": "US",
-            "pattern": "^[a-zA-Z]{2,50}$",
-            "minLength": 2,
-            "maxLength": 2
+            "type": "string"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "productId": {
-        "type": "string",
-        "pattern": "^[a-zA-Z0-9]{5,10}$",
-        "example": "SIM001",
-        "minLength": 5,
-        "maxLength": 10
+        "type": "string"
       },
       "customerId": {
-        "type": "string",
-        "format": "uuid",
-        "example": "a83a29f5-0d63-46f2-8f2e-44c2f1d2e07e",
-        "minLength": 36,
-        "maxLength": 36,
-        "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$",
-        "x-42c-format": "o:uuid"
+        "type": "string"
+      },
+      "priority": {
+        "type": "string"
       },
       "quantity": {
-        "type": "integer",
-        "format": "int32",
-        "example": 1,
-        "minimum": 0,
-        "maximum": 100
+        "type": "integer"
       },
       "status": {
-        "type": "string",
-        "pattern": "^(processing|completed|cancelled)$",
-        "example": "completed",
-        "minLength": 9,
-        "maxLength": 10
+        "type": "string"
       },
       "orderId": {
-        "type": "string",
-        "format": "uuid",
-        "example": "123e4567-e89b-12d3-a456-426614174000",
-        "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$",
-        "minLength": 36,
-        "maxLength": 36,
-        "x-42c-format": "o:uuid"
+        "type": "string"
       },
       "token": {
-        "type": "string",
-        "pattern": "^([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_\\-\\+\\/=]{4,})",
-        "minLength": 25,
-        "maxLength": 1000,
-        "format": "o:common:JWT",
-        "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
-        "x-42c-format": "o:common:JWT"
+        "type": "string"
       },
       "orderDate": {
-        "type": "string",
-        "format": "date-time",
-        "example": "2021-08-30T23:01:14.274085491+15:55",
-        "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])T(?:[01][0-9]|2[0-3]):[0-5][0-9]:(?:[0-5][0-9]|60)(?:\\.[0-9]{1,15})?(?:Z|[+\\-](?:[01][0-9]|2[0-3]):[0-5][0-9])$",
-        "minLength": 20,
-        "maxLength": 38,
-        "x-42c-format": "o:date-time"
+        "type": "string"
       },
       "MessageObject": {
-        "oneOf": [
-          {
-            "type": "object",
-            "properties": {
-              "message": {
-                "$ref": "#/components/schemas/ResponseMessage"
-              }
-            },
-            "required": ["message"]
-          },
-          {
-            "type": "object",
-            "properties": {
-              "error": {
-                "$ref": "#/components/schemas/ResponseMessage"
-              }
-            },
-            "required": ["error"]
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/ResponseMessage"
           }
-        ]
+        }
       },
       "ResponseMessage": {
-        "type": "string",
-        "pattern": "^[A-Za-z0-9\/\\.\"', :_]{1,100}$"
+        "type": "string"
       }
     },
     "responses": {
