@@ -35,7 +35,7 @@ jobs:
               # 42Crunch platform URL
               platform-url: ${{ env.platformUrl }}
               # Log level, one of: FATAL, ERROR, WARN, INFO, DEBUG
-              # log-level: # optional, default is INFO
+              log-level: DEBUG
               # Share new API collections with everyone, one of: OFF, READ_ONLY, READ_WRITE
               # share-everyone: # optional, default is OFF
               # GitHub token for uploading results to Github Code Scanning
