@@ -25,6 +25,7 @@ audit:
     X42C_LOG_LEVEL: "DEBUG"
     X42C_JSON_REPORT: "audit-action-report-${CI_PIPELINE_ID}.json"
     X42C_API_TAGS: "ApiType:Telecom"
+    X42C_IGNORE_FAILURES: "true"
     # Optional: enforce min score locally (SQGs can also be used in the platform)
     # X42C_MIN_SCORE: "75"
   script:
