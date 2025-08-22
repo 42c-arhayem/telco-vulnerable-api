@@ -1,0 +1,111 @@
+stages:
+  - audit
+  - scan_prep
+  - scan_run
+
+variables:
+  PLATFORM_URL: "https://demolabs.42crunch.cloud"
+  PLATFORM_SERVICE: "services.demolabs.42crunch.cloud:8001"
+  API_URL: "https://cute-noble-boar.ngrok-free.app"
+  CONFIG_NAME: "base_config"
+  # Set X42C_API_TOKEN in GitLab > Project > Settings > CI/CD > Variables (masked/protected)
+
+# 1) AUDIT (design-time)
+audit:
+  stage: audit
+  image:
+    name: 42crunch/gitlab-api-security-audit:v4
+  only:
+    refs:
+      - main
+      - merge_requests
+  variables:
+    X42C_API_TOKEN: "$X42C_API_TOKEN"
+    X42C_PLATFORM_URL: "$PLATFORM_URL"
+    X42C_LOG_LEVEL: "DEBUG"
+    X42C_JSON_REPORT: "audit-action-report-${CI_PIPELINE_ID}.json"
+    X42C_API_TAGS: "ApiType:Telecom"
+    # Optional: enforce min score locally (SQGs can also be used in the platform)
+    # X42C_MIN_SCORE: "75"
+  script:
+    - /audit/audit.sh
+    - echo "Audit JSON Report:" && cat "$CI_PROJECT_DIR/$X42C_JSON_REPORT"
+    - |
+      API_PROTECTION_UUID=$(jq -r '.audit.report["oas_files/telco-openapi-protection.json"].apiId' "$CI_PROJECT_DIR/$X42C_JSON_REPORT")
+      API_SCAN_UUID=$(jq -r '.audit.report["oas_files/telco-openapi-remediated.json"].apiId' "$CI_PROJECT_DIR/$X42C_JSON_REPORT")
+      echo "API Protection UUID: $API_PROTECTION_UUID"
+      echo "API Scan UUID: $API_SCAN_UUID"
+      echo "API_PROTECTION_UUID=$API_PROTECTION_UUID" >> audit.env
+      echo "API_SCAN_UUID=$API_SCAN_UUID" >> audit.env
+  artifacts:
+    reports:
+      dotenv: audit.env
+    paths:
+      - "$CI_PROJECT_DIR/$X42C_JSON_REPORT"
+    when: always
+    expire_in: 1 week
+
+# 2) SCAN PREP: read alias from .42c/conf.yaml and upload Scan v2 config to get token
+scan_prep:
+  stage: scan_prep
+  image: python:3.11-alpine
+  needs: ["audit"]
+  only:
+    refs:
+      - main
+      - merge_requests
+  variables:
+    PIP_ROOT_USER_ACTION: "ignore"
+  before_script:
+    - apk add --no-cache bash curl jq yq git
+    - python --version
+  script:
+    - cat "$CI_PROJECT_DIR/.42c/conf.yaml"
+    - |
+      API_ALIAS_ID=$(yq '.apis."oas_files/telco-openapi-remediated.json".alias' < "$CI_PROJECT_DIR/.42c/conf.yaml")
+      echo "Telco API AliasId: $API_ALIAS_ID"
+      echo "API_ALIAS_ID=$API_ALIAS_ID" >> scan.env
+    - |
+      python3 "$CI_PROJECT_DIR/scripts/conformance_scanv2.py" \
+        -c "$X42C_API_TOKEN" \
+        -p "$PLATFORM_URL" \
+        -a "$API_SCAN_UUID" \
+        -n "$CONFIG_NAME" \
+        -t "$CI_PROJECT_DIR/scan_token.json" \
+        -f "$CI_PROJECT_DIR/.42c/scan/${API_ALIAS_ID}/scanconf.json" --action upload_conf
+      SCAN_TOKEN=$(jq -r '.scan_token' "$CI_PROJECT_DIR/scan_token.json")
+      echo "Scan token: $SCAN_TOKEN"
+      echo "SCAN_TOKEN=$SCAN_TOKEN" >> scan.env
+  artifacts:
+    reports:
+      dotenv: scan.env
+    paths:
+      - "$CI_PROJECT_DIR/scan_token.json"
+    when: always
+    expire_in: 1 week
+
+# 3) RUN SCAN: execute 42crunch/scand-agent:v2 against test endpoint
+scan_run:
+  stage: scan_run
+  image: docker:25
+  services:
+    - name: docker:25-dind
+      command: ["--tls=false"]
+  needs: ["scan_prep"]
+  only:
+    refs:
+      - main
+      - merge_requests
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+  script:
+    - echo "Running Conformance Scan v2 for API $API_SCAN_UUID"
+    - docker pull 42crunch/scand-agent:v2
+    - |
+      docker run --rm \
+        -e SCAN_TOKEN="$SCAN_TOKEN" \
+        -e SCAN42C_HOST="$API_URL" \
+        -e PLATFORM_SERVICE="$PLATFORM_SERVICE" \
+        42crunch/scand-agent:v2
+    - echo "Scan report ${PLATFORM_URL}/apis/${API_SCAN_UUID}/scan"
