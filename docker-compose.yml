@@ -1,0 +1,75 @@
+services:
+
+  # ──────────────────────────────
+  # MongoDB
+  # ──────────────────────────────
+  mongo:
+    image: mongo:7
+    container_name: telco-mongo
+    ports:
+      - "27017:27017"       # exposed for local tooling (mongosh, Compass, reset scripts)
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ──────────────────────────────
+  # REST API  (HTTPS :3000)
+  # ──────────────────────────────
+  rest-api:
+    build:
+      context: .
+      dockerfile: rest-api/Dockerfile
+    image: telco-rest-api
+    container_name: telco-rest-api
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: "3000"
+      MONGO_URI: mongodb://mongo:27017/telco-api
+      JWT_SECRET: fmXvHeBcCeZohjwu2qJ6kEhvISu+cz4iIZeRGJ3tOj4=
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  # ──────────────────────────────
+  # GraphQL API — vulnerable  (HTTPS :4000)
+  # ──────────────────────────────
+  graphql-api:
+    build:
+      context: .
+      dockerfile: graphql-api/Dockerfile
+    image: telco-graphql-api
+    container_name: telco-graphql-api
+    ports:
+      - "4000:4000"
+    environment:
+      PORT: "4000"
+      MONGO_URI: mongodb://mongo:27017/telco-api
+      JWT_SECRET: your-secret-key-here
+    command: ["node", "server.js"]
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  # ──────────────────────────────
+  # GraphQL API — secured  (HTTPS :4001)
+  # ──────────────────────────────
+  graphql-api-secured:
+    image: telco-graphql-api          # reuses image built by graphql-api service
+    container_name: telco-graphql-api-secured
+    ports:
+      - "4001:4001"
+    environment:
+      SECURED_PORT: "4001"
+      MONGO_URI: mongodb://mongo:27017/telco-api
+      JWT_SECRET: your-secret-key-here
+    command: ["node", "server-secured.js"]
+    depends_on:
+      - graphql-api                   # ensures image is built before this starts
+
+volumes:
+  mongo_data:

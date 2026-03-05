@@ -1,0 +1,166 @@
+name: Telco API CI - Audit, Scan & Firewall
+
+# Trigger on push or pull requests to the main branch
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  platformUrl: 'https://demolabs.42crunch.cloud'
+  platformService: 'services.demolabs.42crunch.cloud:8001'
+  X42C_API_TOKEN: ${{ secrets.API_KEY }}
+  API_URL: 'https://cute-noble-boar.ngrok-free.app'
+
+jobs:
+
+  # ──────────────────────────────────────────────
+  # Job 1 - 42Crunch API Security Audit
+  # ──────────────────────────────────────────────
+  audit:
+    name: 42Crunch Audit
+    runs-on: ubuntu-latest
+    outputs:
+      api_scan_uuid: ${{ steps.Check_Audit.outputs.API_SCAN_UUID }}
+      api_protection_uuid: ${{ steps.Check_Audit.outputs.API_PROTECTION_UUID }}
+      api_alias_id: ${{ steps.Fetch_API_AliasId.outputs.API_ALIAS_ID }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: List files
+        run: ls -la ${{ github.workspace }}
+
+      # # ── Option A: Docker image ──
+      # - name: Set up Docker
+      #   uses: docker/setup-buildx-action@v2
+
+      # - name: Run 42Crunch Audit Docker Image
+      #   run: |
+      #     docker run -v "${{ github.workspace }}:/workspace" \
+      #       --user 0:0 \
+      #       -e X42C_REPOSITORY_URL=https://github.com/${{ github.repository }} \
+      #       -e X42C_PLATFORM_URL=${{ env.platformUrl }} \
+      #       -e X42C_API_TOKEN=${{ env.X42C_API_TOKEN }} \
+      #       -e X42C_BRANCH_NAME=main \
+      #       -e X42C_LOG_LEVEL=DEBUG \
+      #       -e X42C_JSON_REPORT=audit-action-report-${{ github.run_id }}.json \
+      #       42crunch/docker-api-security-audit:v4
+
+      # ── Option B: Native GitHub Action plugin (current) ──
+      - name: Run 42Crunch Audit (Native Plugin)
+        uses: 42Crunch/api-security-audit-action@v4
+        with:
+          api-token: ${{ env.X42C_API_TOKEN }}
+          platform-url: ${{ env.platformUrl }}
+          log-level: DEBUG
+          ignore-failures: false
+          json-report: audit-action-report-${{ github.run_id }}.json
+          api-tags: "ApiType:Telecom"
+
+      - name: Check Audit Summary Report
+        id: Check_Audit
+        run: |
+          echo "Audit JSON Report:"
+          cat ${{ github.workspace }}/audit-action-report-${{ github.run_id }}.json
+          apiScanId=$(jq -r '.audit.report["rest-api/openapi/telco-openapi-remediated.json"].apiId' \
+            ${{ github.workspace }}/audit-action-report-${{ github.run_id }}.json)
+          apiProtectionId=$(jq -r '.audit.report["rest-api/openapi/telco-openapi-protection.json"].apiId' \
+            ${{ github.workspace }}/audit-action-report-${{ github.run_id }}.json)
+          echo "API Scan UUID: $apiScanId"
+          echo "API Protection UUID: $apiProtectionId"
+          echo "API_SCAN_UUID=$apiScanId" >> $GITHUB_OUTPUT
+          echo "API_PROTECTION_UUID=$apiProtectionId" >> $GITHUB_OUTPUT
+
+      - name: Fetch API AliasId
+        id: Fetch_API_AliasId
+        run: |
+          cat ${{ github.workspace }}/.42c/conf.yaml
+          aliasId=$(yq '.apis.["rest-api/openapi/telco-openapi-remediated.json"].alias' \
+            < ${{ github.workspace }}/.42c/conf.yaml)
+          echo "Telco API AliasId: $aliasId"
+          echo "API_ALIAS_ID=$aliasId" >> $GITHUB_OUTPUT
+
+      - name: Save API UUID for Drift Scan
+        run: |
+          echo "${{ steps.Check_Audit.outputs.API_SCAN_UUID }}" > api-uuid.txt
+          echo "Saved API UUID: $(cat api-uuid.txt)"
+
+      - name: Upload API UUID Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-uuid
+          path: api-uuid.txt
+          retention-days: 7
+
+  # ──────────────────────────────────────────────
+  # Job 2 - 42Crunch Conformance Scan
+  # ──────────────────────────────────────────────
+  conformance-scan:
+    name: 42Crunch Conformance Scan
+    runs-on: ubuntu-latest
+    needs: audit
+
+    env:
+      config_name: telco_scan_demo
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Python dependencies
+        run: python -m pip install requests --upgrade pip
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
+
+      - name: Upload Scan Configuration and Fetch Token
+        id: upload_scan_config
+        run: |
+          python3 ${{ github.workspace }}/scripts/conformance_scanv2.py \
+            -c ${{ secrets.API_KEY }} \
+            -p ${{ env.platformUrl }} \
+            -a ${{ needs.audit.outputs.api_scan_uuid }} \
+            -n ${{ env.config_name }} \
+            -t scan_token.json \
+            -f ${{ github.workspace }}/.42c/scan/${{ needs.audit.outputs.api_alias_id }}/scanconf.json --action upload_conf
+          scan_token=$(cat ${{ github.workspace }}/scan_token.json | jq -r '.scan_token')
+          echo "SCAN_TOKEN=$scan_token" >> $GITHUB_ENV
+          echo "Scan token is $scan_token"
+
+      - name: Run Conformance Scan
+        run: |
+          echo "Scan token is $SCAN_TOKEN"
+          docker pull 42crunch/scand-agent:v2
+          docker run -e SCAN_TOKEN=$SCAN_TOKEN \
+            -e SCAN42C_HOST=${{ env.API_URL }} \
+            -e PLATFORM_SERVICE=${{ env.platformService }} \
+            42crunch/scand-agent:v2
+          echo "Scan report: ${{ env.platformUrl }}/apis/${{ needs.audit.outputs.api_scan_uuid }}/scan"
+
+  # ──────────────────────────────────────────────
+  # Job 3 - Update API Firewall Protection
+  # ──────────────────────────────────────────────
+  update-firewall:
+    name: Reconfigure API Firewall
+    runs-on: ubuntu-latest
+    needs: audit
+
+    steps:
+      - name: Reconfigure Protection
+        run: |
+          echo "Reconfiguring Protection"
+          API_UUID=${{ needs.audit.outputs.api_protection_uuid }}
+          echo "API UUID: $API_UUID"
+          curl --request POST "${{ env.platformUrl }}/api/v1/apis/$API_UUID/protection" \
+            --header "Content-Type: application/json" \
+            --header "X-API-KEY: ${{ env.X42C_API_TOKEN }}"

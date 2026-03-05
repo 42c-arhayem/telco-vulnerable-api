@@ -1,0 +1,11 @@
+{
+  "name": "telco-vulnerable-api-shared",
+  "version": "1.0.0",
+  "description": "Shared dependencies for telco-vulnerable-api (models, middleware, utils)",
+  "private": true,
+  "dependencies": {
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.13.2",
+    "uuid": "^11.1.0"
+  }
+}

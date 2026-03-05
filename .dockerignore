@@ -1,0 +1,32 @@
+# Dependencies (installed fresh during image build)
+**/node_modules
+
+# Git & CI/CD
+.git
+.github
+.gitlab-ci.yaml
+gitlab-ci-example.yaml
+42c-conf.yaml
+.42c/
+
+# Environment files
+**/.env
+
+# Docker orchestration (not needed inside containers)
+docker-compose.yml
+firewall/
+
+# Dev tooling & docs
+scripts/
+postman/
+rest-api/openapi/
+
+# OS artifacts
+**/.DS_Store
+
+# Logs
+**/*.log
+npm-debug.log*
+
+# Docs & markdown
+**/*.md

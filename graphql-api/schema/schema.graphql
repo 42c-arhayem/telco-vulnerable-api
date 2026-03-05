@@ -1,0 +1,248 @@
+# User type representing a customer or admin
+type User {
+  customerId: ID!
+  username: String!
+  email: String!
+  isAdmin: Boolean!
+}
+
+# Authentication response
+type AuthPayload {
+  token: String!
+  user: User!
+  message: String
+}
+
+# Registration response
+type RegisterPayload {
+  message: String!
+  user: User!
+}
+
+# Order type (simple orders)
+type Order {
+  orderId: ID!
+  productId: String!
+  quantity: Int!
+  customerId: String!
+  status: OrderStatus!
+  orderDate: String!
+}
+
+enum OrderStatus {
+  processing
+  completed
+  canceled
+}
+
+# Product Order type (TMF622-like)
+type ProductOrder {
+  orderId: ID!
+  state: String!
+  requestedStartDate: String
+  requestedCompletionDate: String
+  description: String
+  priority: String
+  category: String
+  relatedParty: [RelatedParty]
+  productOrderItem: [ProductOrderItem]
+  orderTotalPrice: [OrderPrice]
+  billingAccount: BillingAccountRef
+  note: [Note]
+  orderDate: String
+}
+
+type RelatedParty {
+  id: String!
+  name: String
+  role: String
+}
+
+type ProductOrderItem {
+  id: String!
+  action: String
+  quantity: Int
+  product: Product
+}
+
+type Product {
+  id: String!
+  name: String
+  productCharacteristic: [ProductCharacteristic]
+}
+
+type ProductCharacteristic {
+  name: String!
+  value: String
+}
+
+type OrderPrice {
+  priceType: String
+  price: Price
+}
+
+type Price {
+  taxIncludedAmount: Float
+  dutyFreeAmount: Float
+  taxRate: Float
+  currencyCode: String
+}
+
+type BillingAccountRef {
+  id: String!
+  name: String
+}
+
+type Note {
+  author: String
+  date: String
+  text: String
+}
+
+# Webhook response
+type WebhookResponse {
+  message: String!
+  data: String
+}
+
+# Generic delete/update response
+type OperationResponse {
+  message: String!
+  success: Boolean!
+}
+
+# Input types for mutations
+input RegisterInput {
+  username: String!
+  password: String!
+  email: String!
+  isAdmin: Boolean
+}
+
+input LoginInput {
+  username: String!
+  password: String!
+}
+
+input CreateOrderInput {
+  productId: String!
+  quantity: Int!
+  customerId: String!
+}
+
+input UpdateOrderInput {
+  productId: String
+  quantity: Int
+  status: OrderStatus
+  orderDate: String
+}
+
+input RelatedPartyInput {
+  id: String!
+  name: String
+  role: String
+}
+
+input ProductOrderItemInput {
+  id: String!
+  action: String
+  quantity: Int
+  product: ProductInput
+}
+
+input ProductInput {
+  id: String!
+  name: String
+  productCharacteristic: [ProductCharacteristicInput]
+}
+
+input ProductCharacteristicInput {
+  name: String!
+  value: String
+}
+
+input OrderPriceInput {
+  priceType: String
+  price: PriceInput
+}
+
+input PriceInput {
+  taxIncludedAmount: Float
+  dutyFreeAmount: Float
+  taxRate: Float
+  currencyCode: String
+}
+
+input BillingAccountRefInput {
+  id: String!
+  name: String
+}
+
+input NoteInput {
+  author: String
+  date: String
+  text: String
+}
+
+input CreateProductOrderInput {
+  state: String
+  requestedStartDate: String
+  requestedCompletionDate: String
+  description: String
+  priority: String
+  category: String
+  relatedParty: [RelatedPartyInput]
+  productOrderItem: [ProductOrderItemInput]!
+  orderTotalPrice: [OrderPriceInput]
+  billingAccount: BillingAccountRefInput
+  note: [NoteInput]
+}
+
+input UpdateProductOrderInput {
+  state: String
+  requestedStartDate: String
+  requestedCompletionDate: String
+  description: String
+  priority: String
+  category: String
+  relatedParty: [RelatedPartyInput]
+  productOrderItem: [ProductOrderItemInput]
+  orderTotalPrice: [OrderPriceInput]
+  billingAccount: BillingAccountRefInput
+  note: [NoteInput]
+}
+
+# Queries
+type Query {
+  # Auth queries
+  me: User
+
+  # Order queries
+  orders(customerId: String, status: OrderStatus): [Order!]!
+  order(orderId: ID!): Order
+
+  # Product Order queries
+  productOrders(customerId: String, state: String): [ProductOrder!]!
+  productOrder(orderId: ID!): ProductOrder
+}
+
+# Mutations
+type Mutation {
+  # Authentication mutations
+  register(input: RegisterInput!): RegisterPayload!
+  login(input: LoginInput!): AuthPayload!
+  deleteUser(username: String!): OperationResponse!
+
+  # Order mutations
+  createOrder(input: CreateOrderInput!): Order!
+  updateOrder(orderId: ID!, input: UpdateOrderInput!): Order!
+  cancelOrder(orderId: ID!): OperationResponse!
+
+  # Product Order mutations
+  createProductOrder(input: CreateProductOrderInput!): ProductOrder!
+  updateProductOrder(orderId: ID!, input: UpdateProductOrderInput!): ProductOrder!
+  deleteProductOrder(orderId: ID!): OperationResponse!
+
+  # Webhook mutation (SSRF vulnerability)
+  triggerWebhook(url: String!): WebhookResponse!
+}

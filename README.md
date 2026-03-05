@@ -3,11 +3,42 @@
 
 A set of telecommunications API endpoints intentionally designed with security vulnerabilities for educational and testing purposes.
 
+**Available in two implementations:**
+- **REST API** (OpenAPI/Swagger) - in `rest-api/` directory
+- **GraphQL API** - in `graphql-api/` directory
+
 ---
 
-## 📘 Introduction
+## � Repository Structure
+
+```
+telco-vulnerable-api/
+├── rest-api/           # REST API (Express/Node.js) — port 3000
+│   └── openapi/        # OpenAPI specs (vulnerable, remediated, protection)
+├── graphql-api/        # GraphQL API (Apollo Server) — ports 4000 (vulnerable) / 4001 (secured)
+├── shared/             # Code shared by both APIs
+│   ├── models/         # Mongoose models (User, Order, ProductOrder)
+│   ├── data/           # MongoDB connection & seeding
+│   ├── middleware/      # Auth middleware (REST + GraphQL variants)
+│   ├── utils/          # JWT helpers
+│   └── certs/          # Self-signed SSL certificates
+├── firewall/           # 42Crunch API Firewall Docker deployment
+│   └── openapi/        # Firewall-specific OpenAPI specs (protection levels)
+├── postman/            # Postman collections (REST + GraphQL)
+└── scripts/            # Utility scripts (manage.sh, reset DB, conformance scan)
+```
+
+---
+
+## �📘 Introduction
 
 The **Telco Vulnerable API** simulates a telecommunications service provider's backend. It allows users to register, log in, and manage product orders, mimicking real-world telco operations. The API is designed to demonstrate common API security issues, especially those listed in the OWASP API Security Top 10, including BOLA, BFLA, mass assignment, excessive data exposure, SSRF, and more.
+
+Both REST and GraphQL implementations demonstrate the same vulnerabilities but adapted to each API paradigm.
+
+**📖 Quick Links:**
+- **[graphql-api/README.md](graphql-api/README.md)** - Detailed GraphQL documentation
+- **[graphql-api/queries.md](graphql-api/queries.md)** - GraphQL sample queries for testing
 
 If you have feature requests or issues, please [create an issue](https://github.com/your-org/telco-vulnerable-api/issues/new).
 
@@ -21,23 +52,72 @@ If you have feature requests or issues, please [create an issue](https://github.
 - **Webhooks**: Simulate webhook event handling. (to be added)
 - **Debug**: Access debug endpoints for testing and internal tooling. (to be added)
 
+### REST vs GraphQL Comparison
+
+| Feature | REST API | GraphQL API (Vulnerable) | GraphQL API (Secured) |
+|---------|----------|--------------------------|----------------------|
+| **Location** | `rest-api/` | `graphql-api/` | `graphql-api/` |
+| **Port** | 3000 | 4000 | 4001 |
+| **Endpoint** | Multiple (`/auth`, `/productOrder`, etc.) | Single (`/graphql`) | Single (`/graphql`) |
+| **Documentation** | OpenAPI/Swagger | GraphQL Schema | GraphQL Schema + Directives |
+| **Security Score** | Varies by spec | 13.02/100 | 93.56/100 |
+| **Vulnerabilities** | BOLA, BFLA, Mass Assignment, SSRF | Same + Introspection, Batch Queries | Significantly Reduced |
+| **Security Layer** | 42Crunch API Firewall (external) | None | Schema Directives + Custom Scalars |
+| **Use Case** | REST API best practices demo | GraphQL vulnerability demo | GraphQL security best practices |
+
 ---
 
 ## 🛠️ Get Started
 
-### Basic Mode
+All services run via Docker Compose. Ensure [Docker Desktop](https://www.docker.com/products/docker-desktop/) is running.
 
-1. Clone this repository to your local machine.
-2. Ensure Docker Desktop (or compatible container software) is running.
-3. Start the API Server(Run command in the folder **src/** inside the repo root directory):
-   ```bash
-   npm start
-   ```
-4. Update PROTECTION_TOKEN_PROTECTION environment variable in **src/firewall-deployment/.env** with your Protection Token generated in the SaaS platform for the API.
-4. Deploy the Firewall using Docker Compose:
-   ```bash
-   docker-compose -f src/firewall-deployment/protect.yml up
-   ```
+### Start Everything (recommended)
+
+```bash
+./scripts/manage.sh all start
+```
+
+| Service | URL |
+|---------|-----|
+| REST API | https://localhost:3000 |
+| GraphQL (vulnerable) | https://localhost:4000/graphql |
+| GraphQL (secured) | https://localhost:4001/graphql |
+
+### Start individual targets
+
+```bash
+./scripts/manage.sh rest start     # REST API + MongoDB only
+./scripts/manage.sh graphql start  # GraphQL APIs + MongoDB only
+```
+
+### Management commands
+
+```bash
+./scripts/manage.sh <target> stop        # stop containers
+./scripts/manage.sh <target> reset       # stop → remove → recreate containers
+./scripts/manage.sh all data-reset       # restart MongoDB container
+./scripts/manage.sh rest fw-reset        # restart 42Crunch API Firewall
+./scripts/manage.sh rest ngrok           # expose REST API via ngrok (port 3000)
+./scripts/manage.sh graphql ngrok        # expose GraphQL API via ngrok (port 4000)
+```
+
+Targets: `rest` | `graphql` | `all`
+
+### Reset database
+
+```bash
+./scripts/reset_database.sh
+```
+
+Drops all collections and reseeds 3 default users.
+
+### (Optional) Deploy 42Crunch API Firewall
+
+Update `PROTECTION_TOKEN` in `firewall/.env`, then:
+
+```bash
+./scripts/manage.sh rest fw-reset
+```
 
 ---
 
@@ -81,18 +161,15 @@ password = password
 
 ### Scripts
 
-Two scripts are included under **/scripts/** folder for easy management:
+Scripts are under the **/scripts/** folder:
 
-Script #1 (**reset_database.sh**)
-The script resets the database and reinitialize the default users.
-It's useful for use after conformance scans to reset garbage data generated from the scan.
-
-Script #2 (**reset_firewall.sh**)
-The script resets the firewall deployment
+- **`manage.sh`** — start, stop, reset, ngrok, and firewall management (REST only). Run `./scripts/manage.sh` for usage.
+- **`reset_database.sh`** — drops all collections and reseeds the 3 default users. Useful after conformance scans.
+- **`conformance_scanv2.py`** — uploads scan configs and fetches tokens for 42Crunch conformance scanning (used by CI/CD).
 
 ---
 
-## Protection Demonstration
+## REST API Firewall Protection Demonstration
 
 | OAS Audit Score | 1 (No Security + No Schemas) | 31 (Security + No Schemas) | 32 (Security + additional properties + No schemas) | 100 (Security + additional properties + schemas) |
 | --- | --- | --- | --- | --- |

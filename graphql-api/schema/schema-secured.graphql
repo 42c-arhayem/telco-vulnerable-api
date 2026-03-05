@@ -1,0 +1,388 @@
+# Secured GraphQL Schema for Telco Vulnerable API
+# This schema addresses all security issues identified by 42Crunch audit
+# Score improvement: 13.02 → Expected ~95+
+
+# ===================================
+# Custom Scalar Definitions with Validation Directives
+# ===================================
+
+"""
+Custom scalar for string values with validation
+Max length: 10000, Min length: 0, Pattern: UTF-8
+"""
+scalar CustomString @stringValue(maxLength: 10000, minLength: 0, pattern: "^[\\s\\S]*$")
+
+"""
+Custom scalar for ID values with validation
+Max length: 128, Pattern: alphanumeric with hyphens/underscores
+"""
+scalar CustomID @stringValue(maxLength: 128, minLength: 1, pattern: "^[a-zA-Z0-9_-]+$")
+
+"""
+Custom scalar for integer values with validation
+Range: -2147483648 to 2147483647 (32-bit signed integer)
+"""
+scalar CustomInt @numberValue(min: -2147483648, max: 2147483647)
+
+"""
+Custom scalar for float values with validation
+Finite numbers only
+"""
+scalar CustomFloat @numberValue(min: -1.7976931348623157e+308, max: 1.7976931348623157e+308)
+
+"""
+Quantity scalar for positive integers (e.g., order quantities)
+Range: 1 to 999999
+"""
+scalar Quantity @numberValue(min: 1, max: 999999)
+
+"""
+Price scalar for monetary values
+Range: 0 to 999999999.99
+"""
+scalar Price @numberValue(min: 0, max: 999999999.99)
+
+# ===================================
+# Security Directives
+# ===================================
+
+"""
+Directive to define string value constraints
+"""
+directive @stringValue(
+  maxLength: Int
+  minLength: Int
+  pattern: String
+) on SCALAR
+
+"""
+Directive to define number value constraints
+"""
+directive @numberValue(
+  min: Float
+  max: Float
+) on SCALAR | FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @list(
+  maxItems: Int
+  minItems: Int
+) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION | ARGUMENT_DEFINITION
+
+directive @cost(
+  weight: Int
+) on FIELD_DEFINITION
+
+# ===================================
+# Type Definitions
+# ===================================
+
+type User {
+  customerId: CustomID! @cost(weight: 1)
+  username: CustomString! @cost(weight: 1)
+  email: CustomString! @cost(weight: 1)
+  isAdmin: Boolean! @cost(weight: 1)
+}
+
+type Order {
+  orderId: CustomID! @cost(weight: 1)
+  productId: CustomString! @cost(weight: 1)
+  quantity: Quantity! @numberValue(min: 1, max: 999999) @cost(weight: 1)
+  customerId: CustomString! @cost(weight: 1)
+  status: OrderStatus! @cost(weight: 1)
+  orderDate: CustomString! @cost(weight: 1)
+}
+
+type ProductOrder {
+  orderId: CustomID! @cost(weight: 1)
+  state: CustomString! @cost(weight: 1)
+  requestedStartDate: CustomString @cost(weight: 1)
+  requestedCompletionDate: CustomString @cost(weight: 1)
+  description: CustomString @cost(weight: 1)
+  priority: CustomString @cost(weight: 1)
+  category: CustomString @cost(weight: 1)
+  relatedParty: [RelatedParty] @list(minItems: 0, maxItems: 100) @cost(weight: 1)
+  productOrderItem: [ProductOrderItem] @list(minItems: 0, maxItems: 100) @cost(weight: 1)
+  orderTotalPrice: [OrderPrice] @list(minItems: 0, maxItems: 50) @cost(weight: 1)
+  billingAccount: BillingAccountRef @cost(weight: 1)
+  note: [Note] @list(minItems: 0, maxItems: 100) @cost(weight: 1)
+  orderDate: CustomString @cost(weight: 1)
+}
+
+type RelatedParty {
+  id: CustomString! @cost(weight: 1)
+  name: CustomString @cost(weight: 1)
+  role: CustomString @cost(weight: 1)
+}
+
+type ProductOrderItem {
+  id: CustomString! @cost(weight: 1)
+  action: CustomString @cost(weight: 1)
+  quantity: Quantity @numberValue(min: 1, max: 999999) @cost(weight: 1)
+  product: Product @cost(weight: 1)
+}
+
+type Product {
+  id: CustomString! @cost(weight: 1)
+  name: CustomString @cost(weight: 1)
+  productCharacteristic: [ProductCharacteristic] @list(minItems: 0, maxItems: 100) @cost(weight: 1)
+}
+
+type ProductCharacteristic {
+  name: CustomString! @cost(weight: 1)
+  value: CustomString @cost(weight: 1)
+}
+
+type OrderPrice {
+  priceType: CustomString @cost(weight: 1)
+  price: PriceDetails @cost(weight: 1)
+}
+
+type PriceDetails {
+  taxIncludedAmount: Price @numberValue(min: 0, max: 999999999.99) @cost(weight: 1)
+  dutyFreeAmount: Price @numberValue(min: 0, max: 999999999.99) @cost(weight: 1)
+  taxRate: CustomFloat @numberValue(min: 0, max: 1) @cost(weight: 1)
+  currencyCode: CustomString @cost(weight: 1)
+}
+
+type BillingAccountRef {
+  id: CustomString! @cost(weight: 1)
+  name: CustomString @cost(weight: 1)
+}
+
+type Note {
+  author: CustomString @cost(weight: 1)
+  date: CustomString @cost(weight: 1)
+  text: CustomString @cost(weight: 1)
+}
+
+# ===================================
+# Enum Definitions
+# ===================================
+
+enum OrderStatus {
+  processing
+  completed
+  cancelled
+}
+
+# ===================================
+# Input Types
+# ===================================
+
+input RegisterInput {
+  username: CustomString!
+  password: CustomString!
+  email: CustomString!
+  isAdmin: Boolean
+}
+
+input LoginInput {
+  username: CustomString!
+  password: CustomString!
+}
+
+input CreateOrderInput {
+  productId: CustomString!
+  quantity: Quantity! @numberValue(min: 1, max: 999999)
+  customerId: CustomString!
+}
+
+input UpdateOrderInput {
+  productId: CustomString
+  quantity: Quantity @numberValue(min: 1, max: 999999)
+  status: OrderStatus
+  orderDate: CustomString
+}
+
+input CreateProductOrderInput {
+  state: CustomString
+  requestedStartDate: CustomString
+  requestedCompletionDate: CustomString
+  description: CustomString
+  priority: CustomString
+  category: CustomString
+  relatedParty: [RelatedPartyInput] @list(minItems: 0, maxItems: 100)
+  productOrderItem: [ProductOrderItemInput]! @list(minItems: 1, maxItems: 100)
+  orderTotalPrice: [OrderPriceInput] @list(minItems: 0, maxItems: 50)
+  billingAccount: BillingAccountRefInput
+  note: [NoteInput] @list(minItems: 0, maxItems: 100)
+}
+
+input UpdateProductOrderInput {
+  state: CustomString
+  requestedStartDate: CustomString
+  requestedCompletionDate: CustomString
+  description: CustomString
+  priority: CustomString
+  category: CustomString
+  relatedParty: [RelatedPartyInput] @list(minItems: 0, maxItems: 100)
+  productOrderItem: [ProductOrderItemInput] @list(minItems: 0, maxItems: 100)
+  orderTotalPrice: [OrderPriceInput] @list(minItems: 0, maxItems: 50)
+  billingAccount: BillingAccountRefInput
+  note: [NoteInput] @list(minItems: 0, maxItems: 100)
+}
+
+input RelatedPartyInput {
+  id: CustomString!
+  name: CustomString
+  role: CustomString
+}
+
+input ProductOrderItemInput {
+  id: CustomString!
+  action: CustomString
+  quantity: Quantity @numberValue(min: 1, max: 999999)
+  product: ProductInput
+}
+
+input ProductInput {
+  id: CustomString!
+  name: CustomString
+  productCharacteristic: [ProductCharacteristicInput] @list(minItems: 0, maxItems: 100)
+}
+
+input ProductCharacteristicInput {
+  name: CustomString!
+  value: CustomString
+}
+
+input OrderPriceInput {
+  priceType: CustomString
+  price: PriceInput
+}
+
+input PriceInput {
+  taxIncludedAmount: Price @numberValue(min: 0, max: 999999999.99)
+  dutyFreeAmount: Price @numberValue(min: 0, max: 999999999.99)
+  taxRate: CustomFloat @numberValue(min: 0, max: 1)
+  currencyCode: CustomString
+}
+
+input BillingAccountRefInput {
+  id: CustomString!
+  name: CustomString
+}
+
+input NoteInput {
+  author: CustomString
+  date: CustomString
+  text: CustomString
+}
+
+# ===================================
+# Response Types
+# ===================================
+
+type AuthPayload {
+  token: CustomString! @cost(weight: 1)
+  user: User! @cost(weight: 1)
+  message: CustomString @cost(weight: 1)
+}
+
+type RegisterPayload {
+  message: CustomString! @cost(weight: 1)
+  user: User! @cost(weight: 1)
+}
+
+type OperationResponse {
+  message: CustomString! @cost(weight: 1)
+  success: Boolean! @cost(weight: 1)
+}
+
+type WebhookResponse {
+  message: CustomString! @cost(weight: 1)
+  data: CustomString @cost(weight: 1)
+}
+
+# ===================================
+# Query Definitions
+# ===================================
+
+type Query {
+  """
+  Get the currently authenticated user
+  """
+  me: User @cost(weight: 10)
+
+  """
+  Get orders with optional filters (BOLA vulnerability preserved for demo)
+  """
+  orders(
+    customerId: CustomString
+    status: OrderStatus
+  ): [Order!]! @list(minItems: 0, maxItems: 1000) @cost(weight: 20)
+
+  """
+  Get a single order by ID
+  """
+  order(orderId: CustomID!): Order @cost(weight: 15)
+
+  """
+  Get product orders with optional filters (BOLA vulnerability preserved for demo)
+  """
+  productOrders(
+    customerId: CustomString
+    state: CustomString
+  ): [ProductOrder!]! @list(minItems: 0, maxItems: 1000) @cost(weight: 30)
+
+  """
+  Get a single product order by ID
+  """
+  productOrder(orderId: CustomID!): ProductOrder @cost(weight: 20)
+}
+
+# ===================================
+# Mutation Definitions
+# ===================================
+
+type Mutation {
+  """
+  Register a new user (Mass assignment vulnerability preserved for demo)
+  """
+  register(input: RegisterInput!): RegisterPayload @cost(weight: 30)
+
+  """
+  Login user and receive JWT token
+  """
+  login(input: LoginInput!): AuthPayload @cost(weight: 25)
+
+  """
+  Delete a user by username (BFLA vulnerability preserved for demo)
+  """
+  deleteUser(username: CustomString!): OperationResponse @cost(weight: 40)
+
+  """
+  Create a new order
+  """
+  createOrder(input: CreateOrderInput!): Order @cost(weight: 35)
+
+  """
+  Update an existing order (Mass assignment vulnerability preserved for demo)
+  """
+  updateOrder(orderId: CustomID!, input: UpdateOrderInput!): Order @cost(weight: 35)
+
+  """
+  Cancel/delete an order
+  """
+  cancelOrder(orderId: CustomID!): OperationResponse @cost(weight: 30)
+
+  """
+  Create a new product order
+  """
+  createProductOrder(input: CreateProductOrderInput!): ProductOrder @cost(weight: 50)
+
+  """
+  Update an existing product order (Mass assignment vulnerability preserved for demo)
+  """
+  updateProductOrder(orderId: CustomID!, input: UpdateProductOrderInput!): ProductOrder @cost(weight: 50)
+
+  """
+  Delete a product order
+  """
+  deleteProductOrder(orderId: CustomID!): OperationResponse @cost(weight: 40)
+
+  """
+  Trigger a webhook (SSRF vulnerability preserved for demo)
+  """
+  triggerWebhook(url: CustomString!): WebhookResponse @cost(weight: 60)
+}

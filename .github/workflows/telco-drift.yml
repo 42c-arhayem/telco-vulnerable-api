@@ -1,0 +1,165 @@
+name: Telco API Drift Scan - Production Monitoring
+
+# Trigger: scheduled monitoring, manual dispatch, or after CI pipeline completes
+on:
+  schedule:
+    - cron: '0 */6 * * *' # Every 6 hours
+  workflow_dispatch:
+    inputs:
+      api_uuid:
+        description: 'API UUID (leave empty to run audit first)'
+        required: false
+  workflow_run:
+    workflows: ["Telco API CI - Audit, Scan & Firewall"]
+    types: [completed]
+    branches: [main]
+
+env:
+  platformUrl: 'https://demolabs.42crunch.cloud'
+  platformService: 'services.demolabs.42crunch.cloud:8001'
+  X42C_API_TOKEN: ${{ secrets.API_KEY }}
+  API_URL: 'https://cute-noble-boar.ngrok-free.app'
+
+jobs:
+
+  # ──────────────────────────────────────────────
+  # Job 1 - Resolve API UUID
+  # ──────────────────────────────────────────────
+  resolve-api:
+    name: Resolve API UUID
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    outputs:
+      api_uuid: ${{ steps.resolve.outputs.API_UUID }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Download API UUID from CI pipeline artifact
+      - name: Download API UUID from Latest CI Run
+        if: ${{ github.event.inputs.api_uuid == '' }}
+        continue-on-error: true
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          name: api-uuid
+          workflow: 42Crunch.yml
+          branch: main
+          path: .
+          if_no_artifact_found: ignore
+
+      # ── Option A: Docker image (current) ──
+      - name: Set up Docker
+        if: ${{ github.event.inputs.api_uuid == '' && !hashFiles('api-uuid.txt') }}
+        uses: docker/setup-buildx-action@v2
+
+      - name: Run 42Crunch Audit to resolve API UUID
+        if: ${{ github.event.inputs.api_uuid == '' && !hashFiles('api-uuid.txt') }}
+        run: |
+          docker run -v "${{ github.workspace }}:/workspace" \
+            --user 0:0 \
+            -e X42C_REPOSITORY_URL=https://github.com/${{ github.repository }} \
+            -e X42C_PLATFORM_URL=${{ env.platformUrl }} \
+            -e X42C_API_TOKEN=${{ env.X42C_API_TOKEN }} \
+            -e X42C_BRANCH_NAME=main \
+            -e X42C_LOG_LEVEL=INFO \
+            -e X42C_JSON_REPORT=audit-action-report-${{ github.run_id }}.json \
+            42crunch/docker-api-security-audit:v4
+
+      # ── Option B: Native GitHub Action plugin (uncomment to use instead) ──
+      # - name: Run 42Crunch Audit to resolve API UUID (Native Plugin)
+      #   if: ${{ github.event_name != 'workflow_run' && github.event.inputs.api_uuid == '' }}
+      #   uses: 42Crunch/api-security-audit-action@v4
+      #   with:
+      #     api-token: ${{ env.X42C_API_TOKEN }}
+      #     platform-url: ${{ env.platformUrl }}
+      #     log-level: INFO
+      #     ignore-failures: true
+      #     json-report: audit-action-report-${{ github.run_id }}.json
+
+      - name: Resolve API UUID
+        id: resolve
+        run: |
+          if [ -n "${{ github.event.inputs.api_uuid }}" ]; then
+            # Manual dispatch with provided UUID
+            echo "API_UUID=${{ github.event.inputs.api_uuid }}" >> $GITHUB_OUTPUT
+            echo "Using provided API UUID: ${{ github.event.inputs.api_uuid }}"
+          elif [ -f api-uuid.txt ]; then
+            # Read from downloaded artifact (from latest CI run)
+            apiId=$(cat api-uuid.txt)
+            echo "API_UUID=$apiId" >> $GITHUB_OUTPUT
+            echo "Using API UUID from CI pipeline artifact: $apiId"
+          else
+            # Fallback: read from audit report (only runs if artifact wasn't found)
+            apiId=$(cat ${{ github.workspace }}/audit-action-report-${{ github.run_id }}.json | jq -r '.audit.report."rest-api/openapi/telco-openapi-remediated.json".apiId')
+            echo "API_UUID=$apiId" >> $GITHUB_OUTPUT
+            echo "Resolved API UUID from audit: $apiId"
+          fi
+
+  # ──────────────────────────────────────────────
+  # Job 2 - 42Crunch Drift Scan (Production)
+  # ──────────────────────────────────────────────
+  drift-scan:
+    name: 42Crunch Drift Scan
+    runs-on: ubuntu-latest
+    needs: resolve-api
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+
+    env:
+      drift_config_name: telco_drift
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Python dependencies
+        run: python -m pip install requests --upgrade pip
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
+
+      - name: Create Default Drift Scan Configuration
+        run: |
+          python3 ${{ github.workspace }}/scripts/conformance_scanv2.py \
+            -c ${{ secrets.API_KEY }} \
+            -p ${{ env.platformUrl }} \
+            -a ${{ needs.resolve-api.outputs.api_uuid }} \
+            -n ${{ env.drift_config_name }} \
+            -s drift_scan \
+            --action create_conf
+
+      - name: Fetch Drift Scan Token
+        run: |
+          python3 ${{ github.workspace }}/scripts/conformance_scanv2.py \
+            -c ${{ secrets.API_KEY }} \
+            -p ${{ env.platformUrl }} \
+            -a ${{ needs.resolve-api.outputs.api_uuid }} \
+            -n ${{ env.drift_config_name }} \
+            -t drift_scan_token.json \
+            --action get_token
+          drift_token=$(cat ${{ github.workspace }}/drift_scan_token.json | jq -r '.scan_token')
+          echo "DRIFT_SCAN_TOKEN=$drift_token" >> $GITHUB_ENV
+          echo "Drift scan token fetched"
+
+      - name: Fetch Telco API Access Token
+        run: |
+          ACCESS_TOKEN=$(curl -sk -X POST "${{ env.API_URL }}/auth/login" \
+            -H "Content-Type: application/json" \
+            -d '{"username": "username", "password": "password"}' | jq -r '.token')
+          echo "ACCESS_TOKEN=$ACCESS_TOKEN" >> $GITHUB_ENV
+          echo "Access token fetched successfully"
+
+      - name: Run Drift Scan
+        run: |
+          docker pull 42crunch/scand-agent:v2
+          docker run -e SCAN_TOKEN=$DRIFT_SCAN_TOKEN \
+            -e SCAN42C_HOST=${{ env.API_URL }} \
+            -e PLATFORM_SERVICE=${{ env.platformService }} \
+            -e SCAN42C_SECURITY_ACCESSTOKEN=$ACCESS_TOKEN \
+            42crunch/scand-agent:v2
+          echo "Drift scan report: ${{ env.platformUrl }}/apis/${{ needs.resolve-api.outputs.api_uuid }}/scan"

@@ -1,0 +1,32 @@
+{
+  "name": "telco-vulnerable-graphql-api",
+  "version": "1.0.0",
+  "description": "GraphQL version of Telco Vulnerable API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "start:secured": "node server-secured.js",
+    "dev": "nodemon server.js",
+    "dev:secured": "nodemon server-secured.js",
+    "audit": "echo 'Run: 42crunch audit graphql/schema/schema-secured.graphql'",
+    "health": "../scripts/graphql-api/health_check.sh"
+  },
+  "keywords": ["graphql", "vulnerable", "security", "education"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@apollo/server": "^4.10.0",
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "graphql": "^16.8.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.13.2",
+    "node-fetch": "^3.3.2",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
