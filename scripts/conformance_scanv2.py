@@ -77,11 +77,13 @@ def testFileName (filename):
     return re.match ("^[a-zA-Z0-9\s_\-\/\.]{5,256}$", filename)
 
 # Generate a default scan V2 config
-def gen_default_config(token: str, name: str, aid: str):
+def gen_default_config(token: str, name: str, aid: str, scan_type: str = None):
     url =  f"{PLATFORM}/api/v2/apis/{aid}/scanConfigurations/default"
     headers = {"accept": "application/json", "X-API-KEY": token}
 
     payload = {"name": name, "reference": True, "v1CompatibilityMode": True}
+    if scan_type:
+        payload["scanType"] = scan_type
     response = requests.post(url, data=json.dumps(payload), headers=headers) 
 
     if response.status_code != 200:
@@ -402,6 +404,7 @@ if __name__ == "__main__":
     parser.add_argument("-t", "--token_file", help="filename to output the scan token - ie token.json - used with create_conf, upload_conf, or get_token")
     parser.add_argument("-r", "--reference", help="During create_conf, upload_conf, regen_conf, and get_token - set the named scan config to be the reference")
     parser.add_argument("-d", "--default", required=False, default=False, action="store_true", help="During get_token, if a config does not exist, create a default one")
+    parser.add_argument("-s", "--scan_type", required=False, help="Scan type to set when uploading config (e.g. drift_scan)")
     parser.add_argument("--action", required=True, help="Action to perform:")
     subparsers.add_parser("list_reports", help="List all scan reports available for an API")
     subparsers.add_parser("get_report", help="Get associated scan report for -n/--config_name")
@@ -423,6 +426,7 @@ if __name__ == "__main__":
     reference = args.reference
     token_default = args.default
     token_file = args.token_file
+    scan_type = args.scan_type
     PLATFORM = args.platform
     action = args.action
 
@@ -442,7 +446,7 @@ if __name__ == "__main__":
 
     if action == "create_conf":
         logger.info("Generating Scan Configuration")
-        gen_default_config (apitoken, name, aid)
+        gen_default_config (apitoken, name, aid, scan_type=scan_type)
         scan_conf_id = retrieve_config_id (apitoken, name, aid)
         if not testUUID(scan_conf_id):
             logger.error(f"Scan Configuration ID is not a valid UUID - {scan_conf_id}.  Exiting...")
@@ -512,6 +516,9 @@ if __name__ == "__main__":
         logger.info(f"Retrieving report for scan {name}...")
         retrieveReport (apitoken, aid, name)
     elif action =="upload_conf":
+        if scan_type:
+            logger.info(f"Creating scan config {name} with scanType={scan_type}")
+            gen_default_config(apitoken, name, aid, scan_type=scan_type)
         logger.info(f"Uploading {filename} into API {aid} for scan config {name}")
         scan_conf_id = update_config (apitoken, name, aid, filename)
         if not testUUID(scan_conf_id):
