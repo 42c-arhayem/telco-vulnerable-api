@@ -1,6 +1,9 @@
 audit:
   branches:
     main: 
-      discovery:
-        search:
-          - rest-api/openapi/*.*
+      collections:
+        telco-api:
+          dir: rest-api/openapi
+          collection_name: "Telco API - Demo"
+          search:
+            - '**/*.*'
