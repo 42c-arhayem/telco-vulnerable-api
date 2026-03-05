@@ -760,7 +760,7 @@
           "state": {
             "type": "string",
             "example": "IL",
-            "pattern": "^[a-zA-Z]{2,50}$",
+            "pattern": "^[a-zA-Z]{2,51}$",
             "minLength": 2,
             "maxLength": 2
           },
