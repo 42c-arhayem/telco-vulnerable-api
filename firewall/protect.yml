@@ -22,3 +22,9 @@ services:
       - TARGET_URL=https://host.docker.internal:3000
       - PRESERVE_HOST=ON
     env_file: ".env"
+    networks:
+      - telco-vulnerable-api_default
+
+networks:
+  telco-vulnerable-api_default:
+    external: true

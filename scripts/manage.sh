@@ -118,8 +118,8 @@ cmd_fw_reset() {
     exit 1
   fi
   echo "==> Resetting API Firewall..."
-  docker compose -p 42crunch -f "$FW_COMPOSE_FILE" down
-  docker compose -p 42crunch -f "$FW_COMPOSE_FILE" up -d telco-secured.42crunch.test
+  remove_container "telco-api-firewall"
+  docker compose -p telco-vulnerable-api -f "$FW_COMPOSE_FILE" up -d telco-secured.42crunch.test
 }
 
 cmd_ngrok() {
